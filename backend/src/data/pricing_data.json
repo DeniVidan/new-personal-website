@@ -1,0 +1,37 @@
+{
+    "services": {
+      "simple_website": {
+        "name": "Simple Website Development",
+        "description": "A responsive website with up to 5 pages.",
+        "price": "$500",
+        "keywords": ["simple website", "website development", "5 pages"]
+      },
+      "seo_optimization": {
+        "name": "SEO Optimization",
+        "description": "Improve your website's visibility on search engines.",
+        "price": "$200",
+        "keywords": ["seo", "search engine optimization"]
+      },
+      "maintenance": {
+        "name": "Website Maintenance",
+        "description": "Keep your website updated and secure.",
+        "price": "$100/month",
+        "keywords": ["maintenance", "website support"]
+      },
+      "logo": {
+        "name": "Logo Design",
+        "description": "A unique logo to represent your brand.",
+        "price": "$150",
+        "keywords": ["logo design", "logo"]
+      }
+    },
+    "add_ons": {
+      "branding": {
+        "name": "Branding Package",
+        "description": "Create a cohesive brand identity.",
+        "price": "$300"
+      }
+
+    }
+  }
+  
