@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import WorkItem from '../components/work/works';
 import Progress from '../components/work/progress';
+import Contact from '../components/sections/Contact';
+import TitleBraker from "../components/sections/TitleBraker";
+import Footer from "../components/sections/Footer";
 
 const myWorks = [
   {
@@ -48,14 +51,17 @@ const MyWorkPage = () => {
   }, []);
 
   return (
-    <div className="text-white p-6 md:max-w-7xl md:mx-auto">
-      <h1 className="text-4xl md:text-6xl mb-28 font-bold leading-[3rem] font-montserrat">Guiding ideas into impactful digital experiences.</h1>
+    <div className="text-white md:max-w-7xl md:mx-auto">
+      <h1 className="text-4xl md:text-6xl mb-28 font-bold leading-[3rem] font-montserrat px-6">Guiding ideas into impactful digital experiences.</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:max-w-7xl md:mx-auto">
         {myWorks.map((work, index) => (
           <WorkItem work={work} index={index} />
         ))}
       </div>
       <Progress />
+      <Contact />
+      <TitleBraker message="TODAY’S DECISION MAKES FUTURE SIMPLE" />
+      <Footer />
     </div>
   );
 };

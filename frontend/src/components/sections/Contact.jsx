@@ -112,9 +112,9 @@ const Contact = () => {
               className="w-full bg-white text-gray-500 rounded-full py-10 px-6 focus:outline-none"
             >
               <option value="" disabled>CHOOSE SERVICE</option>
-              <option value="Website + Webdesign">Website + Web desing</option>
+              <option value="Website + Webdesign">Website + Web design</option>
               <option value="Website only">Website only</option>
-              <option value="Webdesign only">Web desing only</option>
+              <option value="Webdesign only">Web design only</option>
               <option value="Logo creation">Logo</option>
               <option value="Branding">Branding</option>
             </select>

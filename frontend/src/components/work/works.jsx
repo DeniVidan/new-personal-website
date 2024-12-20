@@ -2,7 +2,7 @@ import React from 'react';
 
 const WorkItem = ({ work, index }) => (
   <div 
-    className={`space-y-5 mb-20 md:mb-0 ${index % 2 === 1 ? 'md:mt-[200px]' : ''} w-full`} 
+    className={`space-y-5 mb-20 md:mb-0 p-6 ${index % 2 === 1 ? 'md:mt-[200px]' : ''} w-full`} 
     key={index}
   >
     <img 
