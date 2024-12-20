@@ -7,11 +7,12 @@ dotenv.config(); // Load environment variables
 const app = express();
 
 // Enable CORS for all routes (or you can specify certain origins)
-app.use(cors()); // You can specify your frontend's URL here if you want more restrictions
-app.use(express.json()); // To parse incoming JSON data
 app.use(cors({
-    origin: 'http://localhost:5173', // Replace with your frontend URL
+    origin: 'https://new-personal-website-d7ja85xsm-denis-projects-0fd97f98.vercel.app/', // Replace with your deployed frontend URL on Vercel
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    credentials: true, // If using cookies/auth headers
 }));
+app.use(express.json());
 // Use main router for API routes
 app.use('/api', mainRouter);
 

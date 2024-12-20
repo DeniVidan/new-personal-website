@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import axios from 'axios';
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get the API base URL from .env
 const Contact = () => {
   const titleRef = useRef(null);
   const formRef = useRef(null);
@@ -54,7 +54,7 @@ const Contact = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:5001/api/chatgpt', userData);
+      const response = await axios.post(`${API_BASE_URL}/api/chatgpt`, userData);
       console.log("Offer Sent: ", response.data);
       alert("Message has been sent!"); // Alert for successful message
     } catch (error) {
