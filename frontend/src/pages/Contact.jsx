@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Get the API base URL from .env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get the API base URL from .env
 
 const ContactPage = () => {
   const [messages, setMessages] = useState([]); // State to hold messages
