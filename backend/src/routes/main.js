@@ -148,7 +148,7 @@ const handleUserInput = async (input) => {
             response = "Thank you for providing all the information! Your offer has been sent via email.";
             break;
         default:
-            response = "Thank you for providing all the information!";
+            response = "Thank you! You have provided all the information we need!";
             break;
     }
 

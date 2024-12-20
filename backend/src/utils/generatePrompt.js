@@ -31,9 +31,9 @@ Dear [Customer Name],
 
 Thank you for reaching out to us with your request. Based on your needs, we are excited to offer you the following:
 
-1. Simple Website Development: A responsive website with up to 5 pages tailored to your requirements. \n Price: $500. \n\n
-2. SEO Optimization (Optional): Improve your website's visibility on search engines. \n Price: $200. \n\n
-3. Maintenance Package (Optional): Ensure your website stays updated and secure. \n Price: $100/month. \n\n
+. Simple Website Development: A responsive website with up to 5 pages tailored to your requirements. \n Price: $500. \n\n
+. SEO Optimization (Optional): Improve your website's visibility on search engines. \n Price: $200. \n\n
+. Maintenance Package (Optional): Ensure your website stays updated and secure. \n Price: $100/month. \n\n
 
 Looking forward to your response.
 

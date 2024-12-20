@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Get the API base URL from .env
+
 const ContactPage = () => {
   const [messages, setMessages] = useState([]); // State to hold messages
   const [input, setInput] = useState(""); // State for user input
@@ -33,7 +35,7 @@ const ContactPage = () => {
 
     // Send user input to the backend
     try {
-      const response = await axios.post("http://localhost:5001/api/chat", {
+      const response = await axios.post(`${API_BASE_URL}/api/chat`, {
         userInput: input,
       });
       console.log(response)
