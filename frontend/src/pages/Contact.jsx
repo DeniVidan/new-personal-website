@@ -36,7 +36,10 @@ const ContactPage = () => {
 
     // Send user input to the backend
     try {
-      const response = await axios.post(`https://new-personal-website-2j6p.onrender.com/api/chat`, {
+/*       const response = await axios.post(`https://new-personal-website-2j6p.onrender.com/api/chat`, {
+        userInput: input,
+      }); */
+      const response = await axios.post(`http://localhost:5001/api/chat`, {
         userInput: input,
       });
       console.log(response)
