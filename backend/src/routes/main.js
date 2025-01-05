@@ -25,7 +25,7 @@ router.post("/chatgpt", async (req, res) => {
 
   // Predefined prompt to generate the offer (you can customize this based on your business)
   const offerPrompt = generatePrompt(name, request);
-  console.log(offerPrompt)
+
 
   try {
     // Request ChatGPT to generate the offer based on user input
