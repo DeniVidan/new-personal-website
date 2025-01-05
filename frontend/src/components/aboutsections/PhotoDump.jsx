@@ -127,12 +127,18 @@ const PhotoDump = () => {
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-        {[1, 2, 3].map((_, index) => (
+        {['1.png', '2.jpg', '3.png'].map((image, index) => (
           <div
             key={index}
             ref={el => cardsRef.current[index] = el}
-            className="bg-white rounded-lg shadow-lg h-48"
-          />
+            className="rounded-lg shadow-lg overflow-hidden h-80" // Fixed height increased to 20rem (80 * 0.25rem)
+          >
+            <img 
+              src={`/photodump/${image}`} 
+              alt={`Photo ${index + 1}`} 
+              className="object-cover w-full h-full" // Ensures the image covers the entire area
+            />
+          </div>
         ))}
       </div>
     </div>

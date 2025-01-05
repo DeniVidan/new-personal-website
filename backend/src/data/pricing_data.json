@@ -23,6 +23,12 @@
         "description": "A unique logo to represent your brand.",
         "price": "$150",
         "keywords": ["logo design", "logo"]
+      },
+      "branding": {
+        "name": "Branding Package",
+        "description": "Create a cohesive brand identity.",
+        "price": "$300",
+        "keywords": ["brand", "branding", "identity", "brand identity"]
       }
     },
     "add_ons": {

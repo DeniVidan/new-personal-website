@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get the API base URL from .env
+const LOCAL_API = "http://localhost:5001"
 const Contact = () => {
   const titleRef = useRef(null);
   const formRef = useRef(null);
@@ -54,7 +55,7 @@ const Contact = () => {
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/chatgpt`, userData);
+      const response = await axios.post(`${LOCAL_API}/api/chatgpt`, userData);
       console.log("Offer Sent: ", response.data);
       alert("Message has been sent!"); // Alert for successful message
     } catch (error) {
@@ -112,7 +113,7 @@ const Contact = () => {
               className="w-full bg-white text-gray-500 rounded-full py-10 px-6 focus:outline-none"
             >
               <option value="" disabled>CHOOSE SERVICE</option>
-              <option value="Website + Webdesign">Website + Web design</option>
+              <option value="Website and Webdesign">Website and Web design</option>
               <option value="Website only">Website only</option>
               <option value="Webdesign only">Web design only</option>
               <option value="Logo creation">Logo</option>

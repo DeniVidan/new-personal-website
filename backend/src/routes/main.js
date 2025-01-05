@@ -25,6 +25,7 @@ router.post("/chatgpt", async (req, res) => {
 
   // Predefined prompt to generate the offer (you can customize this based on your business)
   const offerPrompt = generatePrompt(name, request);
+  console.log(offerPrompt)
 
   try {
     // Request ChatGPT to generate the offer based on user input
@@ -43,18 +44,34 @@ router.post("/chatgpt", async (req, res) => {
     const offerText = response.choices[0].message.content;
 
     // Send the generated offer to the user's email
-    const mailOptions = {
+    const mailOptionsToUser = {
       from: process.env.EMAIL, // Your email address
       to: email,
       subject: `Your Custom Offer from Our Store`,
       text: `${offerText}`,
     };
 
-    // Send the email
-    transporter.sendMail(mailOptions, (error, info) => {
+    // Send a copy of the email to yourself
+    const mailOptionsToSelf = {
+      from: process.env.EMAIL, // Your email address
+      to: "denividan@gmail.com", // Your email to receive the copy
+      subject: `New Offer Sent to ${name}`,
+      text: `Offer ${request} sent to ${name} (${email}):\n\n${offerText}`,
+    };
+
+    // Send the email to the user
+    transporter.sendMail(mailOptionsToUser, (error, info) => {
       if (error) {
         return res.status(500).json({ message: "Error sending email", error });
       }
+
+      // Send a copy to yourself
+      transporter.sendMail(mailOptionsToSelf, (error) => {
+        if (error) {
+          console.error("Error sending copy to self:", error);
+        }
+      });
+
       res.status(200).json({ message: "Offer sent successfully", info });
     });
   } catch (error) {
@@ -140,7 +157,19 @@ const handleUserInput = async (input) => {
                 if (error) {
                     console.error("Error sending email:", error);
                 } else {
-                    //console.log("Offer sent successfully:", info);
+                    // Send a copy to yourself
+                    const mailOptionsToSelf = {
+                        from: process.env.EMAIL,
+                        to: "denividan@gmail.com",
+                        subject: `New Offer Sent to ${userData.name}`,
+                        text: `Offer sent to ${userData.name} (${userData.email}):\n\n${offerText}`,
+                    };
+
+                    transporter.sendMail(mailOptionsToSelf, (error) => {
+                        if (error) {
+                            console.error("Error sending copy to self:", error);
+                        }
+                    });
                 }
             });
 
@@ -148,7 +177,7 @@ const handleUserInput = async (input) => {
             response = "Thank you for providing all the information! Your offer has been sent via email.";
             break;
         default:
-            response = "Thank you! You have provided all the information we need!";
+            response = "Thank you for your patience! This page is currently in progress.";
             break;
     }
 

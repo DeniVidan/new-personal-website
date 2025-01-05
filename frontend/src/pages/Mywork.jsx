@@ -7,40 +7,40 @@ import Footer from "../components/sections/Footer";
 
 const myWorks = [
   {
-    title: "Project 1",
+    title: "CMS Website",
     description: "Designed and developed a website for a client who does live wedding sketching, capturing the essence of their artistry.",
     imagePath: "klara-client/background-gif.gif",
-    tags: ["Research", "Creativity", "Design", "Prototype", "Development"]
+    tags: ["Research", "Creativity", "Design", "Prototype", "Development", "Host"]
   },
   {
-    title: "Project 2",
-    description: "Revamp an e-commerce platform.",
-    imagePath: "klara-client/background-gif.gif",
-    tags: ["UI/UX", "Development", "Branding"]
+    title: "Web Design & Branding",
+    description: "Web design for a jewelry startup (work in progress)",
+    imagePath: "karlo-client/karlo_edit.gif",
+    tags: ["Research", "UI/UX", "Design", "Branding", "..."]
   },
   {
-    title: "Project 3",
-    description: "Create a mobile application for local services.",
-    imagePath: "klara-client/background-gif.gif",
-    tags: ["Research", "Design", "Development"]
+    title: "SAAS Landing Page & Branding",
+    description: "Created a modern landing page for a SaaS product, emphasizing user engagement and a strong brand identity.",
+    imagePath: "resq/resq-edit.gif",
+    tags: ["Research", "UI/UX", "Design", "Development", "Branding"]
   },
   {
-    title: "Project 4",
-    description: "Design a marketing campaign for a startup.",
-    imagePath: "klara-client/background-gif.gif",
-    tags: ["Creativity", "Design", "Marketing"]
+    title: "Web Design",
+    description: "Designed a web application for users to securely store and manage their trading history, providing insights and analytics to enhance their trading strategies.",
+    imagePath: "tradekeeper/tradekeeper-edit.gif",
+    tags: ["Research", "UI/UX", "Design"]
   },
   {
-    title: "Project 5",
-    description: "Build a personal portfolio website.",
-    imagePath: "klara-client/background-gif.gif",
-    tags: ["Web Development", "Design"]
+    title: "Personal Landing Page",
+    description: "Build my personal portfolio website.",
+    imagePath: "old-portfolio/oldwebsite-edit.gif",
+    tags: ["Research", "Creativity", "Design", "Prototype", "Development", "Host"]
   },
   {
-    title: "Project 6",
-    description: "Develop a blog platform.",
-    imagePath: "klara-client/background-gif.gif",
-    tags: ["Development", "Content Management"]
+    title: "Final Work",
+    description: "Final work for university focused on developing a comprehensive restaurant reservation system.",
+    imagePath: "zavrsni/zavrsni-edit.gif",
+    tags: ["Research", "Creativity", "Design", "Prototype", "Branding", "Development"]
   }
 ];
 
