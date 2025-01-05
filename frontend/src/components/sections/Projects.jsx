@@ -12,7 +12,7 @@ const myWorks = [
   {
     title: "Web Design & Branding",
     description: "Web design for a jewelry startup (work in progress)",
-    imagePath: "karlo-client/karlo_edit.gif",
+    imagePath: "karlo-client/karlo-edit.gif",
     tags: ["Research", "UI/UX", "Design", "Branding", "..."]
   },
   {
