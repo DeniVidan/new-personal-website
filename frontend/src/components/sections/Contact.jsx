@@ -55,7 +55,7 @@ const Contact = () => {
     };
 
     try {
-      const response = await axios.post(`${LOCAL_API}/api/chatgpt`, userData);
+      const response = await axios.post(`${API_BASE_URL}/api/chatgpt`, userData);
       console.log("Offer Sent: ", response.data);
       alert("Message has been sent!"); // Alert for successful message
     } catch (error) {
