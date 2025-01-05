@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get the API base URL from .env
-console.log("api: ", API_BASE_URL)
+/* console.log("api: ", API_BASE_URL) */
 
 const ContactPage = () => {
   const [messages, setMessages] = useState([]); // State to hold messages
@@ -36,12 +36,12 @@ const ContactPage = () => {
 
     // Send user input to the backend
     try {
-/*       const response = await axios.post(`${API_BASE_URL}`, {
-        userInput: input,
-      }); */
-      const response = await axios.post(`http://localhost:5001/api/chat`, {
+      const response = await axios.post(`${API_BASE_URL}`, {
         userInput: input,
       });
+/*       const response = await axios.post(`http://localhost:5001/api/chat`, {
+        userInput: input,
+      }); */
       console.log(response)
       // Display AI message
       setMessages((prev) => [
