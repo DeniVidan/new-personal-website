@@ -87,7 +87,7 @@ const Navbar = () => {
         {/* Brand Section */}
         <div className="flex items-center gap-3">
           <div className="brand-name text-sm text-white">
-            <img className="w-2/3 lg:w-full" src="DENI_logo.svg" alt="" />
+            <img className="w-2/3 lg:w-full" src="DENI_logo2.svg" alt="" />
           </div>
         </div>
   
