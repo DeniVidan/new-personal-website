@@ -66,26 +66,19 @@ router.post("/chatgpt", async (req, res) => {
     // Send a copy of the email to yourself
     const mailOptionsToSelf = {
       from: process.env.EMAIL, // Your email address
-      to: "denividan@gmail.com", // Your email to receive the copy
+      to: process.env.ADMIN_EMAIL || "denividan@gmail.com", // Your email to receive the copy
       subject: `New Offer Sent to ${name}`,
       text: `Offer ${request} sent to ${name} (${email}):\n\n${offerText}`,
     };
 
     // Send the email to the user
-    transporter.sendMail(mailOptionsToUser, (error, info) => {
-      if (error) {
-        return res.status(500).json({ message: "Error sending email", error });
-      }
-
-      // Send a copy to yourself
-      transporter.sendMail(mailOptionsToSelf, (error) => {
-        if (error) {
-          console.error("Error sending copy to self:", error);
-        }
-      });
-
-      res.status(200).json({ message: "Offer sent successfully", info });
-    });
+    const userEmailResponse = await transporter.sendMail(mailOptionsToUser);
+    console.log("Email sent to user:", userEmailResponse);
+  
+    const adminEmailResponse = await transporter.sendMail(mailOptionsToSelf);
+    console.log("Email sent to admin:", adminEmailResponse);
+  
+    res.status(200).json({ message: "Offer sent successfully" });
   } catch (error) {
     console.error("Error generating offer or sending email:", error);
     res.status(500).json({ message: "An error occurred", error });
