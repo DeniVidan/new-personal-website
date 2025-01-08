@@ -26,32 +26,12 @@ const generatePrompt = (name, request) => {
         )
         .join('\n')}`;
 
-  const exampleEmail = `
-Dear [Customer Name],
-
-Thank you for reaching out to us with your request. Based on your needs, we are excited to offer you the following:
-
-. Simple Website Development: A responsive website with up to 5 pages tailored to your requirements. \n Price: $500. \n\n
-. SEO Optimization (Optional): Improve your website's visibility on search engines. \n Price: $200. \n\n
-. Maintenance Package (Optional): Ensure your website stays updated and secure. \n Price: $100/month. \n\n
-
-Looking forward to your response.
-
-Best regards,  
-Deni Vidan  
-
-VIDAN LIMITED d.o.o
-`;
-
   return `
 You are an AI assistant creating professional offers for a web development company. Each email must be professional, clear, and include the specified closing salutation.
 
 ## Context:
 Here are the available services:
 ${JSON.stringify(pricingData.services, null, 2)}
-
-Add-ons:
-${JSON.stringify(pricingData.add_ons, null, 2)}
 
 ## Instructions:
 1. Start with a warm greeting using the customer's name.
@@ -64,16 +44,6 @@ Best regards,
 Deni Vidan  
 
 VIDAN LIMITED d.o.o
-
-6. Do not omit or modify the salutation under any circumstances.
-
-## Example Email:
-Use the following email as a reference for tone, structure, and formatting:
-${exampleEmail}
-
-## Company Information:
-- Company Name: VIDAN LIMITED d.o.o
-- Owner Name: Deni Vidan
 
 ## Customer Information:
 - Name: ${name}

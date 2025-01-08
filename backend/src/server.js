@@ -8,7 +8,7 @@ const app = express();
 
 // Enable CORS for all routes (or you can specify certain origins)
 app.use(cors({
-    origin: 'https://new-personal-website-eosin.vercel.app', // Replace with your deployed frontend URL on Vercel
+    origin: 'https://denividan.com', // Replace with your deployed frontend URL on Vercel
     /* origin: 'http://localhost:5173/', */
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
     credentials: true, // If using cookies/auth headers

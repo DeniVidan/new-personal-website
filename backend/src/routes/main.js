@@ -1,11 +1,17 @@
 const { OpenAI } = require("openai");
 const nodemailer = require("nodemailer");
 const express = require("express");
+const { v4: uuidv4 } = require("uuid");
 const { generatePrompt } = require("../utils/generatePrompt");
+const ConversationManager = require("../controllers/conversationManager")
+const { getSessionData, updateSessionData, clearSession, createOrUpdateSession} = require("../firebase/firebaseSessionStore")
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
+
+
 
 const router = express.Router();
-
+router.use(cookieParser());
 // Initialize OpenAI API
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -19,6 +25,8 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASSWORD, // Your email password or app password
   },
 });
+const conversationManager = new ConversationManager();
+
 
 router.post("/chatgpt", async (req, res) => {
   const { name, email, request } = req.body; // Get the user data from the frontend
@@ -82,121 +90,73 @@ router.post("/chatgpt", async (req, res) => {
 
 // Store user data temporarily (in production, this would be in a database)
 
-let userData = {
-    name: "",
-    email: "",
-    interest: "",
-};
 
-let conversationState = {
-    step: 1, // Step 1: waiting for name, 2: waiting for email, 3: waiting for interest
-};
 
-// Helper functions for validation
-const validateEmail = (email) => {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
-};
+router.post("/chat", async (req, res) => {
+  const { userInput } = req.body;
+  const existingToken = req.cookies.sessionToken;
 
-// Function to handle user input and generate appropriate responses
-const handleUserInput = async (input) => {
-    let response = "";
+  try {
+    let sessionToken = existingToken;
+    let sessionData;
 
-    switch (conversationState.step) {
-        case 1:
-            // If the input is likely a name (not empty or short), accept it
-            if (input.trim().length > 1) {
-                userData.name = input;
-                conversationState.step = 2;
-                response = `Nice to meet you, ${input}! Can you please provide your email address?`;
-            } else {
-                response = "Please provide a valid name.";
-            }
-            break;
-        case 2:
-            // Validate and save email
-            if (validateEmail(input)) {
-                userData.email = input;
-                conversationState.step = 3;
-                response = "Thank you! Now, what are you interested in?";
-            } else {
-                response = "Please enter a valid email address.";
-            }
-            break;
-        case 3:
-            // Save the user's interest
-            userData.interest = input;
+    if (!sessionToken) {
+      // 1) Create token & session if no cookie yet
+      sessionToken = uuidv4();
+      sessionData = { userData: {}, step: "name" };
 
-            // Generate the prompt for the personalized offer
-            const offerPrompt = generatePrompt(userData.name, input); // Generate the offer prompt using generatePrompt.js
+      // Save to Firestore w/ expiry
+      await createOrUpdateSession(sessionToken, sessionData);
 
-            // Now pass this generated offer prompt to OpenAI for the response
-            const offerResponse = await openai.chat.completions.create({
-                model: "gpt-3.5-turbo",
-                messages: [
-                    {
-                        role: "system",
-                        content: "You are a helpful assistant for generating custom offers.",
-                    },
-                    { role: "user", content: offerPrompt },
-                ],
-            });
-
-            // Get the generated offer text from OpenAI's response
-            const offerText = offerResponse.choices[0].message.content;
-
-            // Send the offer to the user's email
-            const mailOptions = {
-                from: process.env.EMAIL,
-                to: userData.email,
-                subject: `Your Custom Offer from Our Store`,
-                text: offerText,
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    console.error("Error sending email:", error);
-                } else {
-                    // Send a copy to yourself
-                    const mailOptionsToSelf = {
-                        from: process.env.EMAIL,
-                        to: "denividan@gmail.com",
-                        subject: `New Offer Sent to ${userData.name}`,
-                        text: `Offer sent to ${userData.name} (${userData.email}):\n\n${offerText}`,
-                    };
-
-                    transporter.sendMail(mailOptionsToSelf, (error) => {
-                        if (error) {
-                            console.error("Error sending copy to self:", error);
-                        }
-                    });
-                }
-            });
-
-            conversationState.step = 4; // End of conversation
-            response = "Thank you for providing all the information! Your offer has been sent via email.";
-            break;
-        default:
-            response = "Thank you for your patience! This page is currently in progress.";
-            break;
+      // Set cookie (3-min expiry)
+      res.cookie("sessionToken", sessionToken, {
+        httpOnly: true,
+        maxAge: 3 * 60 * 1000, // 3 minutes
+      });
+    } else {
+      // 2) If cookie exists, load or validate
+      try {
+        sessionData = await getSessionData(sessionToken);
+      } catch (error) {
+        if (error.message === "Session has expired.") {
+          // If session is expired, user must wait
+          return res.status(400).json({
+            error: "Wait a few more minutes before chatting again.",
+          });
+        } else {
+          throw error;
+        }
+      }
     }
 
-    return response;
-};
-
-router.post('/chat', async (req, res) => {
-    const { userInput } = req.body;
-
-    // Handle the user input and generate the next message based on the step
-    const aiResponse = await handleUserInput(userInput);
-
-    // If it's the first message (no previous state), send the initial message
-    if (conversationState.step === 1 && aiResponse.includes("Hi there")) {
-        return res.json({ aiMessage: aiResponse });
+    // If we just created a new token, sessionData might be empty,
+    // but userInput = "Deni" or something. Let ConversationManager parse it:
+    if (!sessionData) {
+      // If somehow sessionData is undefined, re-init
+      sessionData = { userData: {}, step: "name" };
     }
 
-    // Send the AI's response back to the frontend
-    res.json({ aiMessage: aiResponse });
+    // 3) Let conversation manager handle this user input
+    const { aiMessage, updatedSession } = await conversationManager.processInput(
+      userInput,
+      openai,
+      sessionData,
+      sessionToken
+    );
+
+    // 4) Update the session in Firestore
+    await createOrUpdateSession(sessionToken, updatedSession);
+
+    // 5) Return the AI response
+    return res.json({
+      aiMessage,
+    });
+  } catch (error) {
+    console.error("Error in /chat route:", error);
+    return res.status(500).json({
+      error: "An error occurred. Please try again later.",
+    });
+  }
 });
 
 module.exports = router; // Export the router for use in server.js
