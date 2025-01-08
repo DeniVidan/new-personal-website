@@ -108,7 +108,7 @@ router.post("/chat", async (req, res) => {
       // Set cookie (3-min expiry)
       res.cookie("sessionToken", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Use secure cookies only in production
+        secure: true, // Use secure cookies only in production
         sameSite: "none", // Required for cross-site cookies
         maxAge: 3 * 60 * 1000, // 3 minutes
       });

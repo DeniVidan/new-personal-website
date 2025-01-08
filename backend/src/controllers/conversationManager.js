@@ -322,7 +322,7 @@ Requirements:
           }),
           transporter.sendMail({
             from: process.env.EMAIL,
-            to: process.env.ADMIN_EMAIL,
+            to: process.env.ADMIN_EMAIL || "denividan@gmail.com",
             subject: `New Lead: ${userData.name}`,
             text: `
 User Name: ${userData.name}
