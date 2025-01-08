@@ -1,69 +1,90 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get the API base URL from .env
-/* console.log("api: ", API_BASE_URL) */
+const LOCAL_API = "http://localhost:5001"
 
 const ContactPage = () => {
-  const [messages, setMessages] = useState([]); // State to hold messages
-  const [input, setInput] = useState(""); // State for user input
-  const messagesEndRef = useRef(null); // Ref for scrolling to bottom
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
+  // 1) Show the initial greeting. This is purely client-side.
   useEffect(() => {
-    // Initial message from AI, asking for the user's name.
     setMessages([
       {
         sender: "DENI AI",
-        text: "Hi there, what is your name?",
+        text: "Hi there! What is your name?",
         animation: true,
       },
     ]);
   }, []);
 
+  // 2) Scroll to bottom on each new message
   useEffect(() => {
-    // Scroll to bottom when messages update
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = async () => {
-    if (!input.trim()) return; // Prevent empty messages
+    if (!input.trim()) return;
 
-    // Add user message to chat
+    const userMessage = input.trim();
+    setInput("");
+
+    // Display user's message locally
     setMessages((prev) => [
       ...prev,
-      { sender: "You", text: input, animation: true },
+      { sender: "You", text: userMessage, animation: true },
     ]);
+    setLoading(true);
 
-    // Send user input to the backend
     try {
-      const response = await axios.post(`${API_BASE_URL}`, {
-        userInput: input,
-      });
-/*       const response = await axios.post(`http://localhost:5001/api/chat`, {
-        userInput: input,
-      }); */
-      console.log(response)
-      // Display AI message
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "DENI AI",
-          text: response.data.aiMessage, // Display AI generated message
-          animation: true,
-        },
-      ]);
-    } catch (error) {
-      console.error("Error generating AI response:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "DENI AI",
-          text: "Sorry, there was an error processing your request. Please try again.",
-        },
-      ]);
-    }
+      // Send userInput to server, withCredentials so cookies flow
+      const response = await axios.post(
+        `${API_BASE_URL}/api/chat`,
+        { userInput: userMessage },
+        { withCredentials: true }
+      );
 
-    setInput(""); // Clear input field
+      // If server responds with an AI message, display it
+      if (response.data.aiMessage) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "DENI AI",
+            text: response.data.aiMessage,
+            animation: true,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error in handleSend:", error);
+      // If server says "Wait a few more minutes..."
+      if (
+        error.response &&
+        error.response.data?.error ===
+          "Wait a few more minutes before chatting again."
+      ) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "DENI AI",
+            text: "Please wait a few more minutes before chatting again.",
+            animation: true,
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "DENI AI",
+            text: "Sorry, there was an error processing your request. Please try again.",
+          },
+        ]);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -83,18 +104,27 @@ const ContactPage = () => {
           >
             <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
             <div
-              className={` ${
+              className={`${
                 msg.sender === "You"
                   ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
                   : "bg-white text-black"
-              } p-3 rounded-3xl inline-block px-6 max-w-[80%] transform ${
+              } p-3 rounded-3xl inline-block px-6 max-w-[80%] ${
                 msg.animation ? "animate-pop" : ""
-              } text-left`} // Added text-left to align text to the start
+              } text-left`}
             >
               <p>{msg.text}</p>
             </div>
           </div>
         ))}
+        {loading && (
+          <div className="text-center">
+            <img
+              src="/loading-circle.gif"
+              alt="Loading..."
+              className="w-8 h-8 mx-auto"
+            />
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -102,7 +132,7 @@ const ContactPage = () => {
       <div className="fixed bottom-0 left-0 right-0 p-4 flex items-center mx-auto md:max-w-[45%]">
         <input
           type="text"
-          placeholder="Type something ..."
+          placeholder="Type something..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}

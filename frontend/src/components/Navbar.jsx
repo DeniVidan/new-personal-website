@@ -20,8 +20,6 @@ const Navbar = () => {
     setMenuOpen((prev) => !prev);
   };
 
-
-
   useEffect(() => {
     if (menuOpen) {
       gsap.to(menuRef.current, {
@@ -140,7 +138,7 @@ const Navbar = () => {
                   isActive
                     ? "bg-white text-transparent text-stroke"
                     : "text-white"
-                }`
+                } font-montserrat` // Added custom font class here
               }
               onClick={toggleMenu}
               onMouseEnter={({ isActive }) =>
