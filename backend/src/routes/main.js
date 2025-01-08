@@ -11,7 +11,11 @@ const cookieParser = require("cookie-parser");
 
 
 const router = express.Router();
+
+
 router.use(cookieParser());
+
+
 // Initialize OpenAI API
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -111,8 +115,11 @@ router.post("/chat", async (req, res) => {
       // Set cookie (3-min expiry)
       res.cookie("sessionToken", sessionToken, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Use secure cookies only in production
+        sameSite: "none", // Required for cross-site cookies
         maxAge: 3 * 60 * 1000, // 3 minutes
       });
+      
     } else {
       // 2) If cookie exists, load or validate
       try {
