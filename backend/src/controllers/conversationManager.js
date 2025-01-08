@@ -434,10 +434,6 @@ ${fallbackEmail.body}
    * based on the scenario. We pass userData if needed for personalization.
    */
   async generatePoliteReply(context, openai) {
-    // context.scenario = e.g. "askService", "gotNameNeedEmail", ...
-    // context.userData = { name, email, interest }
-
-    // We'll build a scenario-based system prompt
     const systemPrompt = `
 You are a friendly, polite AI assistant.
 You have partial user data: ${JSON.stringify(context.userData, null, 2)}
@@ -448,8 +444,8 @@ Reference any data we already have (like their name if we know it).
 Request only the missing piece of data (if needed).
 
 Examples:
-- If scenario="invalidOrMissingName", you might say: 
-  "I’m sorry, I didn’t catch your name. Could you please share it with me?"
+- If scenario="serviceProvidedInsteadOfName", you might say:
+  "I understand you would like {userData.interest}, but I didn’t catch your name. Could you please share it with me so we can proceed?"
 - If scenario="gotNameNeedEmail", you might say:
   "Nice to meet you, {userData.name}! Could I please have your email address so we can proceed?"
 - If scenario="askService", you might say:
@@ -461,27 +457,25 @@ Keep it short, polite, and direct. Return ONLY the text. No JSON, no code fences
     `;
 
     try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: `Please produce one polite message for scenario "${context.scenario}".`,
-          },
-        ],
-      });
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                { role: "system", content: systemPrompt },
+                {
+                    role: "user",
+                    content: `Please produce one polite message for scenario "${context.scenario}".`,
+                },
+            ],
+        });
 
-      let rawText = completion.choices[0].message.content;
-      // We only want the raw text (no backticks, etc.)
-      rawText = rawText.replace(/```/g, "").trim();
-
-      return rawText;
+        let rawText = completion.choices[0].message.content;
+        return rawText.replace(/```/g, "").trim();
     } catch (err) {
-      console.error("Error generating polite reply:", err);
-      return "Sorry, I'm having trouble with that request.";
+        console.error("Error generating polite reply:", err);
+        return "Sorry, I'm having trouble with that request.";
     }
-  }
+}
+
 }
 
 module.exports = ConversationManager;
