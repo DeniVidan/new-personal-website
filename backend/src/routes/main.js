@@ -97,6 +97,11 @@ router.post("/chat", async (req, res) => {
     let sessionToken = existingToken;
     let sessionData;
 
+    res.setHeader("Access-Control-Allow-Origin", "https://denividan.com"); // Replace with your domain
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.setHeader("Pragma", "no-cache");
+
     if (!sessionToken) {
       // 1) Create token & session if no cookie yet
       sessionToken = uuidv4();
