@@ -93,38 +93,34 @@ router.post("/chat", async (req, res) => {
   const { userInput } = req.body;
   const existingToken = req.cookies.sessionToken;
 
+  console.log("User input:", userInput);
+  console.log("Existing token from cookies:", existingToken);
+
   try {
     let sessionToken = existingToken;
     let sessionData;
 
-    res.setHeader("Access-Control-Allow-Origin", "https://denividan.com"); // Replace with your domain
-    res.setHeader("Access-Control-Allow-Credentials", "true");
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
-    res.setHeader("Pragma", "no-cache");
-
     if (!sessionToken) {
-      // 1) Create token & session if no cookie yet
+      console.log("No session token, creating a new one...");
       sessionToken = uuidv4();
       sessionData = { userData: {}, step: "name" };
 
-      // Save to Firestore w/ expiry
       await createOrUpdateSession(sessionToken, sessionData);
 
-      // Set cookie (3-min expiry)
       res.cookie("sessionToken", sessionToken, {
         httpOnly: true,
-        secure: true, // Use secure cookies only in production
-        sameSite: "none", // Required for cross-site cookies
-        maxAge: 3 * 60 * 1000, // 3 minutes
+        secure: true,
+        sameSite: "none",
+        maxAge: 3 * 60 * 1000,
       });
-      
     } else {
-      // 2) If cookie exists, load or validate
       try {
+        console.log("Validating existing session token...");
         sessionData = await getSessionData(sessionToken);
+        console.log("Session data loaded:", sessionData);
       } catch (error) {
         if (error.message === "Session has expired.") {
-          // If session is expired, user must wait
+          console.log("Session expired for token:", sessionToken);
           return res.status(400).json({
             error: "Wait a few more minutes before chatting again.",
           });
@@ -134,14 +130,7 @@ router.post("/chat", async (req, res) => {
       }
     }
 
-    // If we just created a new token, sessionData might be empty,
-    // but userInput = "Deni" or something. Let ConversationManager parse it:
-    if (!sessionData) {
-      // If somehow sessionData is undefined, re-init
-      sessionData = { userData: {}, step: "name" };
-    }
-
-    // 3) Let conversation manager handle this user input
+    console.log("Processing input with conversation manager...");
     const { aiMessage, updatedSession } = await conversationManager.processInput(
       userInput,
       openai,
@@ -149,19 +138,15 @@ router.post("/chat", async (req, res) => {
       sessionToken
     );
 
-    // 4) Update the session in Firestore
     await createOrUpdateSession(sessionToken, updatedSession);
 
-    // 5) Return the AI response
-    return res.json({
-      aiMessage,
-    });
+    console.log("AI Message:", aiMessage);
+    return res.json({ aiMessage });
   } catch (error) {
     console.error("Error in /chat route:", error);
-    return res.status(500).json({
-      error: "An error occurred. Please try again later.",
-    });
+    return res.status(500).json({ error: "An error occurred. Please try again later." });
   }
 });
+
 
 module.exports = router; // Export the router for use in server.js
