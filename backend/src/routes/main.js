@@ -92,32 +92,38 @@ router.post("/chatgpt", async (req, res) => {
 router.post("/chat", async (req, res) => {
   const { userInput } = req.body;
   const existingToken = req.cookies.sessionToken;
-
-  console.log("User input:", userInput);
-  console.log("Existing token from cookies:", existingToken);
-
+  console.log("Incoming Cookies:", req.cookies);
   try {
     let sessionToken = existingToken;
     let sessionData;
 
+    // Add headers for cross-origin and cache control
+    res.setHeader("Access-Control-Allow-Origin", "https://denividan.com"); // Replace with your domain
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+    res.setHeader("Pragma", "no-cache");
+
     if (!sessionToken) {
-      console.log("No session token, creating a new one...");
+      // 1) Create token & session if no cookie yet
       sessionToken = uuidv4();
       sessionData = { userData: {}, step: "name" };
 
+      // Save to Firestore with expiry
       await createOrUpdateSession(sessionToken, sessionData);
 
+      // Set cookie (cross-origin compatible)
       res.cookie("sessionToken", sessionToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 3 * 60 * 1000,
+        httpOnly: true, // Prevent JavaScript access
+        secure: true,  // Required for HTTPS
+        sameSite: "none", // Allow cross-site cookies
+        maxAge: 3 * 60 * 1000, // 3 minutes
       });
+
+      console.log("New session created:", sessionToken);
     } else {
       try {
-        console.log("Validating existing session token...");
         sessionData = await getSessionData(sessionToken);
-        console.log("Session data loaded:", sessionData);
+        console.log("Existing session loaded:", sessionData);
       } catch (error) {
         if (error.message === "Session has expired.") {
           console.log("Session expired for token:", sessionToken);
@@ -130,7 +136,7 @@ router.post("/chat", async (req, res) => {
       }
     }
 
-    console.log("Processing input with conversation manager...");
+    // Process user input
     const { aiMessage, updatedSession } = await conversationManager.processInput(
       userInput,
       openai,
@@ -138,9 +144,10 @@ router.post("/chat", async (req, res) => {
       sessionToken
     );
 
+    // Update session in Firestore
     await createOrUpdateSession(sessionToken, updatedSession);
 
-    console.log("AI Message:", aiMessage);
+    // Respond with AI message
     return res.json({ aiMessage });
   } catch (error) {
     console.error("Error in /chat route:", error);
