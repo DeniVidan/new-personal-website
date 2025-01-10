@@ -93,6 +93,7 @@ router.post("/chat", async (req, res) => {
   const { userInput } = req.body;
   const existingToken = req.cookies.sessionToken;
   console.log("Incoming Cookies:", req.cookies);
+  console.log("Request Headers:", req.headers);
   try {
     let sessionToken = existingToken;
     let sessionData;
