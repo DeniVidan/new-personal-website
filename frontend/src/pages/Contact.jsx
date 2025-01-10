@@ -27,65 +27,46 @@ const ContactPage = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
+  
     const userMessage = input.trim();
     setInput("");
-
+  
     // Display user's message locally
     setMessages((prev) => [
       ...prev,
       { sender: "You", text: userMessage, animation: true },
     ]);
     setLoading(true);
-
+  
     try {
-      // Send userInput to server, withCredentials so cookies flow
       const response = await axios.post(
         `${API_BASE_URL}/api/chat`,
         { userInput: userMessage },
-        { withCredentials: true }
+        {
+          withCredentials: true, // Ensure cookies are sent
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
-
-      // If server responds with an AI message, display it
+  
       if (response.data.aiMessage) {
         setMessages((prev) => [
           ...prev,
-          {
-            sender: "DENI AI",
-            text: response.data.aiMessage,
-            animation: true,
-          },
+          { sender: "DENI AI", text: response.data.aiMessage, animation: true },
         ]);
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-      // If server says "Wait a few more minutes..."
-      if (
-        error.response &&
-        error.response.data?.error ===
-          "Wait a few more minutes before chatting again."
-      ) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "DENI AI",
-            text: "Please wait a few more minutes before chatting again.",
-            animation: true,
-          },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: "DENI AI",
-            text: "Sorry, there was an error processing your request. Please try again.",
-          },
-        ]);
-      }
+      setMessages((prev) => [
+        ...prev,
+        { sender: "DENI AI", text: "An error occurred. Please try again." },
+      ]);
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
