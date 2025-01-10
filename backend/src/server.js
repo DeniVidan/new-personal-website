@@ -10,7 +10,7 @@ const app = express();
 app.use(cors({
     origin: 'https://denividan.com', // Replace with your deployed frontend URL on Vercel
     /* origin: 'http://localhost:5173/', */
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+    
     credentials: true, // If using cookies/auth headers
 }));
 app.use(express.json());
