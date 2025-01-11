@@ -5,6 +5,7 @@ const CookieBanner = () => {
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
 
   useEffect(() => {
+    // Check if user previously accepted cookies
     const cookieConsent = localStorage.getItem("cookiesAccepted");
     if (cookieConsent === "true") {
       setCookiesAccepted(true);
@@ -12,13 +13,20 @@ const CookieBanner = () => {
   }, []);
 
   const acceptCookies = () => {
+    // Store the user preference locally
     localStorage.setItem("cookiesAccepted", "true");
     setCookiesAccepted(true);
 
-    // Example of setting a test cookie
-    document.cookie = "testCookie=true; path=/; secure; samesite=none";
+    // Example of setting a test cookie that expires in 1 year (31536000 seconds).
+    // 'secure' + 'sameSite=none' require HTTPS in production.
+    document.cookie =
+      "testCookie=true; path=/; max-age=31536000; samesite=none; secure";
+
+    // Optionally, reload or update something so the site recognizes the cookie immediately
+    // window.location.reload(); // Uncomment if you want the page to reload
   };
 
+  // If cookies are accepted, hide this banner
   if (cookiesAccepted) return null;
 
   return (
