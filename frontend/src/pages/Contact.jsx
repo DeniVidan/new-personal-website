@@ -3,13 +3,12 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const ContactPage = () => {
+const ContactPage = ({ onForceShowBanner }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Show initial greeting
   useEffect(() => {
     setMessages([
       {
@@ -20,7 +19,6 @@ const ContactPage = () => {
     ]);
   }, []);
 
-  // Always scroll to bottom on messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -31,7 +29,6 @@ const ContactPage = () => {
     const userMessage = input.trim();
     setInput("");
 
-    // Add user message to local state
     setMessages((prev) => [
       ...prev,
       { sender: "You", text: userMessage, animation: true },
@@ -39,32 +36,32 @@ const ContactPage = () => {
     setLoading(true);
 
     try {
-      // Check if user accepted cookies from localStorage
       const hasConsent = localStorage.getItem("cookiesAccepted") === "true";
       if (!hasConsent) {
+        // Show "Cookies are required" message + "Accept" button
         setMessages((prev) => [
           ...prev,
           {
             sender: "DENI AI",
             text: "Cookies are required to use the chatbot. Please accept cookies.",
+            // We'll attach a special "acceptCookies" flag or something 
+            // so we can render a button
+            acceptCookiesPrompt: true,
           },
         ]);
         return;
       }
 
-      // If user has consent, do the request with credentials
+      // Proceed with normal chatbot request
       const response = await axios.post(
         `${API_BASE_URL}/api/chat`,
         { userInput: userMessage },
         {
           withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      // Display AI response
       if (response.data.aiMessage) {
         setMessages((prev) => [
           ...prev,
@@ -92,28 +89,57 @@ const ContactPage = () => {
     }
   };
 
+  // If user clicks "Accept Cookies" in chat, call onForceShowBanner to re-show the banner
+  const handleChatAcceptCookies = () => {
+    if (onForceShowBanner) onForceShowBanner();
+  };
+
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
       <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
-          >
-            <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
+        {messages.map((msg, index) => {
+          // If the message has "acceptCookiesPrompt", we show a button
+          if (msg.acceptCookiesPrompt) {
+            return (
+              <div
+                key={index}
+                className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
+              >
+                <div className="text-sm text-gray-400 mb-1">
+                  {msg.sender}
+                </div>
+                <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left">
+                  <p>{msg.text}</p>
+                  <button
+                    className="ml-2 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded shadow mt-2"
+                    onClick={handleChatAcceptCookies}
+                  >
+                    Accept Cookies
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          // Normal message
+          return (
             <div
-              className={`${
-                msg.sender === "You"
-                  ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
-                  : "bg-white text-black"
-              } p-3 rounded-3xl inline-block px-6 max-w-[80%] ${
-                msg.animation ? "animate-pop" : ""
-              } text-left`}
+              key={index}
+              className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
             >
-              <p>{msg.text}</p>
+              <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
+              <div
+                className={`${
+                  msg.sender === "You"
+                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                    : "bg-white text-black"
+                } p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left`}
+              >
+                <p>{msg.text}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {loading && (
           <div className="text-center">
