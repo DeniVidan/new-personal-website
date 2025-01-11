@@ -426,18 +426,12 @@ ${fallbackEmail.body}
     const matchedServices = Object.values(this.pricingData.services).filter(
       (srv) => srv.keywords.some((kw) => lower.includes(kw.toLowerCase()))
     );
-  
-    // Collect additional services to recommend
-    const additionalServices = Object.values(this.pricingData.services).filter(
-      (srv) => !matchedServices.includes(srv) // Exclude matched services
-    );
-  
+
     if (matchedServices.length > 0) {
-      return { matchedServices, additionalServices, fallbackNeeded: false };
+      return { matchedServices, fallbackNeeded: false };
     }
-    return { matchedServices: [], additionalServices, fallbackNeeded: true };
+    return { matchedServices: [], fallbackNeeded: true };
   }
-  
 
   /**
    * generatePoliteReply:
