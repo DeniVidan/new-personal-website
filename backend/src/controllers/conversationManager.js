@@ -278,11 +278,6 @@ ${matchedServices
   .map((s) => `${s.name} (${s.price}) - ${s.description}`)
   .join("\n")}
 
-We also recommend the following additional services:
-${additionalServices
-  .map((s) => `${s.name} (${s.price}) - ${s.description}`)
-  .join("\n")}
-
 Write an email in JSON only:
 {
   "subject": "...",
