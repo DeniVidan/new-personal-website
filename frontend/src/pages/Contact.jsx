@@ -44,8 +44,6 @@ const ContactPage = ({ onForceShowBanner }) => {
           {
             sender: "DENI AI",
             text: "Cookies are required to use the chatbot. Please accept cookies.",
-            // We'll attach a special "acceptCookies" flag or something 
-            // so we can render a button
             acceptCookiesPrompt: true,
           },
         ]);
@@ -91,7 +89,9 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   // If user clicks "Accept Cookies" in chat, call onForceShowBanner to re-show the banner
   const handleChatAcceptCookies = () => {
+    localStorage.setItem("cookiesAccepted", "true"); // Set cookies accepted
     if (onForceShowBanner) onForceShowBanner();
+    window.location.reload(); // Refresh the page
   };
 
   return (
