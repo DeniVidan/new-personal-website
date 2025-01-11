@@ -278,6 +278,11 @@ ${matchedServices
   .map((s) => `${s.name} (${s.price}) - ${s.description}`)
   .join("\n")}
 
+We also recommend the following additional services:
+${additionalServices
+  .map((s) => `${s.name} (${s.price}) - ${s.description}`)
+  .join("\n")}
+
 Write an email in JSON only:
 {
   "subject": "...",
@@ -421,12 +426,18 @@ ${fallbackEmail.body}
     const matchedServices = Object.values(this.pricingData.services).filter(
       (srv) => srv.keywords.some((kw) => lower.includes(kw.toLowerCase()))
     );
-
+  
+    // Collect additional services to recommend
+    const additionalServices = Object.values(this.pricingData.services).filter(
+      (srv) => !matchedServices.includes(srv) // Exclude matched services
+    );
+  
     if (matchedServices.length > 0) {
-      return { matchedServices, fallbackNeeded: false };
+      return { matchedServices, additionalServices, fallbackNeeded: false };
     }
-    return { matchedServices: [], fallbackNeeded: true };
+    return { matchedServices: [], additionalServices, fallbackNeeded: true };
   }
+  
 
   /**
    * generatePoliteReply:

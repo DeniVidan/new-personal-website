@@ -2,13 +2,13 @@
   "services": {
     "website": {
       "name": "Website",
-      "description": "A responsive website up to 5 pages.",
+      "description": "A responsive website up to 7 pages.",
       "price": "€800",
       "keywords": ["website", "web site", "site"]
     },
     "web_design": {
       "name": "Web Design",
-      "description": "Design the look and feel of a website up to 10 pages.",
+      "description": "Design the look and feel of a website up to 7 pages.",
       "price": "€400",
       "keywords": ["web design", "ui", "ux"]
     },
@@ -17,6 +17,12 @@
       "description": "Unique brand logo creation.",
       "price": "€250",
       "keywords": ["logo", "branding"]
+    },
+    "branding": {
+      "name": "Branding",
+      "description": "Complete brand identity creation, including guidelines.",
+      "price": "€600",
+      "keywords": ["branding", "brand identity", "identity"]
     }
   }
 }
