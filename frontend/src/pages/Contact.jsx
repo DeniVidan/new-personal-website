@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Cookies } from "react-cookie-consent";
 import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get the API base URL from .env
 const LOCAL_API = "http://localhost:5001"
@@ -31,7 +32,6 @@ const ContactPage = () => {
     const userMessage = input.trim();
     setInput("");
   
-    // Display user's message locally
     setMessages((prev) => [
       ...prev,
       { sender: "You", text: userMessage, animation: true },
@@ -39,21 +39,29 @@ const ContactPage = () => {
     setLoading(true);
   
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/chat`,
-        { userInput: userMessage },
-        {
-          withCredentials: true, // Ensure cookies are sent
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const consent = Cookies.get("userConsent");
+      if (consent === "true") {
+        const response = await axios.post(
+          `${API_BASE_URL}/api/chat`,
+          { userInput: userMessage },
+          {
+            withCredentials: true, // Send cookies only if consented
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
   
-      if (response.data.aiMessage) {
+        if (response.data.aiMessage) {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "DENI AI", text: response.data.aiMessage, animation: true },
+          ]);
+        }
+      } else {
         setMessages((prev) => [
           ...prev,
-          { sender: "DENI AI", text: response.data.aiMessage, animation: true },
+          { sender: "DENI AI", text: "Cookies are required to use the chatbot. Please accept cookies." },
         ]);
       }
     } catch (error) {
