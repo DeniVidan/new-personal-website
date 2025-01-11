@@ -114,9 +114,11 @@ router.post("/chat", async (req, res) => {
 
       // Set cookie (cross-origin compatible)
       res.cookie("sessionToken", sessionToken, {
-        httpOnly: true, // Prevent JavaScript access
-        secure: true,  // Required for HTTPS
-        sameSite: "none", // Allow cross-site cookies
+        domain: ".denividan.com",  // notice the dot prefix
+        path: "/",
+        secure: true,              // require HTTPS
+        sameSite: "none",          // if you need cross-subdomain usage
+        httpOnly: true,
         maxAge: 3 * 60 * 1000, // 3 minutes
       });
 
