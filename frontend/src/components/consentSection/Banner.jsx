@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import CookieConsent from "react-cookie-consent";
 
 const CookieBanner = () => {
   const [cookiesAccepted, setCookiesAccepted] = useState(false);
@@ -13,20 +12,18 @@ const CookieBanner = () => {
   }, []);
 
   const acceptCookies = () => {
-    // Store the user preference locally
+    // Store the user preference in localStorage
     localStorage.setItem("cookiesAccepted", "true");
     setCookiesAccepted(true);
 
-    // Example of setting a test cookie that expires in 1 year (31536000 seconds).
-    // 'secure' + 'sameSite=none' require HTTPS in production.
+    // Also set an actual browser cookie (for reference/testing)
+    // 'secure' + 'sameSite=none' require HTTPS in production
+    // 'max-age=31536000' => 1 year in seconds
     document.cookie =
-      "testCookie=true; path=/; max-age=31536000; samesite=none; secure";
-
-    // Optionally, reload or update something so the site recognizes the cookie immediately
-    // window.location.reload(); // Uncomment if you want the page to reload
+      "cookieConsent=accepted; path=/; max-age=31536000; samesite=none; secure";
   };
 
-  // If cookies are accepted, hide this banner
+  // If already accepted, hide the banner
   if (cookiesAccepted) return null;
 
   return (
