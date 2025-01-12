@@ -13,6 +13,18 @@ const AboutPage = () => {
   const rectangleRef = useRef(null);
   const servicesRef = useRef(null);
 
+  // Calculate age based on birthday
+  const calculateAge = () => {
+    const birthDate = new Date('2000-05-11');
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   useEffect(() => {
     // Scroll to top on page load
     window.scrollTo(0, 0);
@@ -129,7 +141,7 @@ const AboutPage = () => {
               My name is Deni Vidan
             </p>
             <p ref={el => bioTextRefs.current[1] = el} className="text-lg md:text-3xl text-gray-200">
-              24 years old
+              {calculateAge()} years old
             </p>
             <p ref={el => bioTextRefs.current[2] = el} className="text-lg md:text-3xl text-gray-200">
               I love creating
