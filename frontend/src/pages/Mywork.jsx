@@ -61,7 +61,7 @@ const MyWorkPage = () => {
       <Progress />
       <Contact />
       <TitleBraker message="TODAY’S DECISION MAKES FUTURE SIMPLE" />
-      <Footer className="w-full absolute left-0"/>
+      <Footer className="w-full"/>
     </div>
   );
 };
