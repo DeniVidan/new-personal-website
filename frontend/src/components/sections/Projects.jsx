@@ -133,61 +133,64 @@ const Projects = () => {
   }, []);
 
   return (
-    <div 
-      ref={divRef}
-      className="min-h-screen bg-gradient-to-br from-red-500 to-orange-500 mx-auto p-8 py-96 relative"
+    <div
+    ref={divRef}
+    className="min-h-screen bg-gradient-to-br from-red-500 to-orange-500 mx-auto p-8 py-96 relative"
+  >
+    <h1
+      ref={titleRef}
+      className="text-5xl md:text-7xl font-bold text-white text-center mb-12 font-custom"
     >
-        <h1
-        ref={titleRef}
-        className="text-5xl md:text-7xl font-bold text-white text-center mb-12 font-custom"
+      PROJECTS
+    </h1>
+    {!cardsLoaded && (
+      <div
+        ref={scrollIconRef}
+        className="absolute w-full top-4 left-0 text-white opacity-50 animate-bounce flex flex-col items-center"
       >
-        PROJECTS
-      </h1>
-      {!cardsLoaded && (
-        <div 
-          ref={scrollIconRef}
-          className="absolute w-full top-4 left-0 text-white opacity-50 animate-bounce flex flex-col items-center"
+        <span className="mb-2">Scroll</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-8 w-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          <span className="mb-2">Scroll</span>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-8 w-8"
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </div>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-        {myWorks.map((work, index) => (
-          <div
-            key={index}
-            ref={el => cardsRef.current[index] = el}
-            className="rounded-lg shadow-lg overflow-hidden"
-          >
-            <img 
-              src={work.imagePath} 
-              alt={work.title} 
-              className="w-full h-72 object-cover" // Increased height for mobile
-            />
-          </div>
-        ))}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 14l-7 7m0 0l-7-7m7 7V3"
+          />
+        </svg>
+      </div>
+    )}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+      {myWorks.map((work, index) => (
         <div
-          ref={el => cardsRef.current[6] = el}
-          className="bg-white rounded-lg shadow-lg h-72 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors" // Increased height for mobile
-          onClick={() => window.location.href = '/projects'}
+          key={index}
+          ref={(el) => (cardsRef.current[index] = el)}
+          className="rounded-lg shadow-lg overflow-hidden"
         >
-          <span className="text-xl font-semibold text-gray-800">View More Projects →</span>
+          <img
+            src={work.imagePath}
+            alt={work.title}
+            className="w-full h-72 object-cover md:h-auto md:aspect-square" // Adjust for desktop
+          />
         </div>
+      ))}
+      <div
+        ref={(el) => (cardsRef.current[6] = el)}
+        className="bg-white rounded-lg shadow-lg h-72 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors md:h-auto md:aspect-square" // Adjust for desktop
+        onClick={() => (window.location.href = "/projects")}
+      >
+        <span className="text-xl font-semibold text-gray-800">
+          View More Projects →
+        </span>
       </div>
     </div>
+  </div>
+  
   );
 };
 

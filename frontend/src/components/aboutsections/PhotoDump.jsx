@@ -94,54 +94,55 @@ const PhotoDump = () => {
   }, []);
 
   return (
-    <div 
-      ref={divRef}
-      className="min-h-screen bg-gradient-to-br from-red-500 to-orange-500 mx-auto p-8 py-96 relative"
+<div
+  ref={divRef}
+  className="min-h-screen bg-gradient-to-br from-red-500 to-orange-500 mx-auto p-8 py-96 relative"
+>
+  <h1
+    ref={titleRef}
+    className="text-5xl md:text-7xl font-bold text-white text-center mb-12 font-custom"
+  >
+    PHOTO DUMP
+  </h1>
+  {!cardsLoaded && (
+    <div
+      ref={scrollIconRef}
+      className="absolute w-full top-4 left-0 text-white opacity-50 animate-bounce flex flex-col items-center"
     >
-        <h1
-        ref={titleRef}
-        className="text-5xl md:text-7xl font-bold text-white text-center mb-12 font-custom"
+      <span className="mb-2">Scroll</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-8 w-8"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
       >
-        PHOTO DUMP
-      </h1>
-      {!cardsLoaded && (
-        <div 
-          ref={scrollIconRef}
-          className="absolute w-full top-4 left-0 text-white opacity-50 animate-bounce flex flex-col items-center"
-        >
-          <span className="mb-2">Scroll</span>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-8 w-8"
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </div>
-      )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-        {['1.png', '2.jpg', '3.png'].map((image, index) => (
-          <div
-            key={index}
-            ref={el => cardsRef.current[index] = el}
-            className="rounded-lg shadow-lg overflow-hidden h-80" // Fixed height increased to 20rem (80 * 0.25rem)
-          >
-            <img 
-              src={`/photodump/${image}`} 
-              alt={`Photo ${index + 1}`} 
-              className="object-cover w-full h-full" // Ensures the image covers the entire area
-            />
-          </div>
-        ))}
-      </div>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M19 14l-7 7m0 0l-7-7m7 7V3"
+        />
+      </svg>
     </div>
+  )}
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+    {["1.png", "2.jpg", "3.png"].map((image, index) => (
+      <div
+        key={index}
+        ref={(el) => (cardsRef.current[index] = el)}
+        className="rounded-lg shadow-lg overflow-hidden"
+      >
+        <img
+          src={`/photodump/${image}`}
+          alt={`Photo ${index + 1}`}
+          className="w-full h-72 object-cover md:h-auto md:aspect-square" // Adjust for desktop
+        />
+      </div>
+    ))}
+  </div>
+</div>
+
   );
 };
 
