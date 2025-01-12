@@ -157,7 +157,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type something..."
-          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-hidden"
+          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-scroll"
           style={{ lineHeight: "1.5", height: `${Math.min(inputRef.current?.scrollHeight || 0, 120)}px` }}
         />
         <div
