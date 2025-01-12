@@ -163,7 +163,7 @@ const ContactPage = ({ onForceShowBanner }) => {
     }}
     onKeyPress={handleKeyPress}
     placeholder="Type something..."
-    className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-auto overflow-x-hidden custom-scrollbar"
+    className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-scroll overflow-x-hidden custom-scrollbar"
     style={{
       lineHeight: "1.5",
       maxHeight: "120px", // Maximum height of 6 rows
