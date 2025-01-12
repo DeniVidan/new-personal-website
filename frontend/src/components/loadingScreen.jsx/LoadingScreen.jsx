@@ -26,21 +26,20 @@ const LoadingScreen = ({ setLoaded }) => {
   }, [setLoaded]);
 
   return (
+<div
+  id="loading-screen"
+  className="fixed inset-0 flex flex-col items-center justify-center bg-black text-white z-50"
+>
+  <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+  <div className="bg-gray-700 w-64 h-2 rounded">
     <div
-      id="loading-screen"
-      className="fixed inset-0 flex flex-col items-center justify-center bg-black text-white z-50"
-    >
-      <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-      <div className="bg-gray-700 w-64 h-2 rounded">
-        <div
-          className="h-2 rounded"
-          style={{
-            width: `${progress}%`,
-            background: `linear-gradient(to right, theme('colors.pink.500'), orange)`,
-          }}
-        ></div>
-      </div>
-    </div>
+      className={`h-2 rounded bg-gradient-to-r from-pink-500 to-orange-500`}
+      style={{
+        width: `${progress}%`,
+      }}
+    ></div>
+  </div>
+</div>
   );
 };
 
