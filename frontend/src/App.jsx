@@ -8,13 +8,19 @@ import MyWorkPage from "./pages/Mywork";
 import Mesh from "./components/Mesh";
 import CookieBanner from "./components/consentSection/Banner";
 import CookiePolicy from "./components/consentSection/Policy";
+import LoadingScreen from "./components/loadingScreen.jsx/LoadingScreen"; // Import the loading screen
 
 function App() {
+  const [loaded, setLoaded] = useState(false); // Track loading state
   const [showBanner, setShowBanner] = useState(false);
 
   const forceShowBanner = () => {
     setShowBanner(true);
   };
+
+  if (!loaded) {
+    return <LoadingScreen setLoaded={setLoaded} />; // Show loading screen if not loaded
+  }
 
   return (
     <Router>
