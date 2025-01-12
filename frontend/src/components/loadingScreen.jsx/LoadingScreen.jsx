@@ -14,7 +14,7 @@ const LoadingScreen = ({ setLoaded }) => {
           // Animate loading screen out
           gsap.to("#loading-screen", {
             opacity: 0,
-            duration: 0.8,
+            duration: 1,
             onComplete: () => setLoaded(true),
           });
         }
@@ -33,8 +33,11 @@ const LoadingScreen = ({ setLoaded }) => {
       <h1 className="text-2xl font-bold mb-4">Loading...</h1>
       <div className="bg-gray-700 w-64 h-2 rounded">
         <div
-          className="bg-orange-500 h-2 rounded"
-          style={{ width: `${progress}%` }}
+          className="h-2 rounded"
+          style={{
+            width: `${progress}%`,
+            background: `linear-gradient(to right, pink, orange)`,
+          }}
         ></div>
       </div>
     </div>
