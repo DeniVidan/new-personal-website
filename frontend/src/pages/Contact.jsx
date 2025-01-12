@@ -148,17 +148,20 @@ const ContactPage = ({ onForceShowBanner }) => {
       </div>
 
       {/* Input field */}
+      {/* Input field */}
       <div className="fixed bottom-0 left-0 right-0 p-4 flex items-center mx-auto md:max-w-[45%]">
         <textarea
           ref={inputRef}
           rows={1}
-          maxRows={6}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
           placeholder="Type something..."
-          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-scroll"
-          style={{ lineHeight: "1.5", height: `${Math.min(inputRef.current?.scrollHeight || 0, 120)}px` }}
+          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-auto overflow-x-hidden custom-scrollbar"
+          style={{
+            lineHeight: "1.5",
+            height: `${Math.min(inputRef.current?.scrollHeight || 0, 120)}px`,
+          }}
         />
         <div
           className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
