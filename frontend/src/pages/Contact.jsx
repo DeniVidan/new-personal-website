@@ -9,6 +9,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     setMessages([
@@ -23,6 +24,17 @@ const ContactPage = ({ onForceShowBanner }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (inputRef.current) {
+        inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    };
+
+    window.addEventListener("resize", handleResize); // Trigger on keyboard open/close
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -93,7 +105,10 @@ const ContactPage = ({ onForceShowBanner }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
+    <div
+      ref={containerRef}
+      className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat"
+    >
       <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24">
         {messages.map((msg, index) => {
           if (msg.acceptCookiesPrompt) {
@@ -148,44 +163,44 @@ const ContactPage = ({ onForceShowBanner }) => {
       </div>
 
       {/* Input field */}
-      {/* Input field */}
       <div className="fixed bottom-0 left-0 right-0 p-4 flex items-center mx-auto md:max-w-[45%]">
-  <textarea
-    ref={inputRef}
-    rows={1}
-    value={input}
-    onChange={(e) => {
-      setInput(e.target.value);
-      // Dynamically adjust the height of the textarea
-      const textarea = inputRef.current;
-      textarea.style.height = "auto"; // Reset height
-      textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`; // Set new height (max 120px)
-    }}
-    onKeyPress={handleKeyPress}
-    placeholder="Type something..."
-    className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-scroll overflow-x-hidden custom-scrollbar"
-    style={{
-      lineHeight: "1.5",
-      maxHeight: "120px", // Maximum height of 6 rows
-    }}
-  />
-  <div
-    className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
-    onClick={handleSend}
-    style={{
-      height: "48px",
-      width: "48px",
-    }}
-  >
-    <img
-      src="chess-horse.svg"
-      alt="Chess Horse"
-      className="w-3/4 h-3/4 object-contain"
-    />
-  </div>
-</div>
+        <textarea
+          ref={inputRef}
+          rows={1}
+          value={input}
+          onChange={(e) => {
+            setInput(e.target.value);
+            const textarea = inputRef.current;
+            textarea.style.height = "auto";
+            textarea.style.height = `${Math.min(
+              textarea.scrollHeight,
+              120
+            )}px`;
+          }}
+          onKeyPress={handleKeyPress}
+          placeholder="Type something..."
+          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-auto overflow-x-hidden custom-scrollbar"
+          style={{
+            lineHeight: "1.5",
+            maxHeight: "120px",
+          }}
+        />
+        <div
+          className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
+          onClick={handleSend}
+          style={{
+            height: "48px",
+            width: "48px",
+          }}
+        >
+          <img
+            src="chess-horse.svg"
+            alt="Chess Horse"
+            className="w-3/4 h-3/4 object-contain"
+          />
+        </div>
+      </div>
     </div>
   );
 };
-
 export default ContactPage;
