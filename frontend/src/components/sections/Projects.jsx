@@ -135,7 +135,7 @@ const Projects = () => {
   return (
     <div
     ref={divRef}
-    className="min-h-screen bg-gradient-to-br from-red-500 to-orange-500 mx-auto p-8 py-96 relative"
+    className="min-h-screen bg-gradient-to-br from-red-500 to-orange-500 mx-0 p-8 py-96 relative"
   >
     <h1
       ref={titleRef}
