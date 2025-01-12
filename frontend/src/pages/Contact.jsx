@@ -8,6 +8,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     setMessages([
@@ -38,7 +39,6 @@ const ContactPage = ({ onForceShowBanner }) => {
     try {
       const hasConsent = localStorage.getItem("cookiesAccepted") === "true";
       if (!hasConsent) {
-        // Show "Cookies are required" message + "Accept" button
         setMessages((prev) => [
           ...prev,
           {
@@ -50,7 +50,6 @@ const ContactPage = ({ onForceShowBanner }) => {
         return;
       }
 
-      // Proceed with normal chatbot request
       const response = await axios.post(
         `${API_BASE_URL}/api/chat`,
         { userInput: userMessage },
@@ -81,33 +80,29 @@ const ContactPage = ({ onForceShowBanner }) => {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
 
-  // If user clicks "Accept Cookies" in chat, call onForceShowBanner to re-show the banner
   const handleChatAcceptCookies = () => {
-    localStorage.setItem("cookiesAccepted", "true"); // Set cookies accepted
+    localStorage.setItem("cookiesAccepted", "true");
     if (onForceShowBanner) onForceShowBanner();
-    window.location.reload(); // Refresh the page
+    window.location.reload();
   };
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
       <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24">
         {messages.map((msg, index) => {
-          // If the message has "acceptCookiesPrompt", we show a button
           if (msg.acceptCookiesPrompt) {
             return (
               <div
                 key={index}
                 className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
               >
-                <div className="text-sm text-gray-400 mb-1">
-                  {msg.sender}
-                </div>
+                <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left">
                   <p>{msg.text}</p>
                   <button
@@ -121,7 +116,6 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal message
           return (
             <div
               key={index}
@@ -155,13 +149,16 @@ const ContactPage = ({ onForceShowBanner }) => {
 
       {/* Input field */}
       <div className="fixed bottom-0 left-0 right-0 p-4 flex items-center mx-auto md:max-w-[45%]">
-        <input
-          type="text"
-          placeholder="Type something..."
+        <textarea
+          ref={inputRef}
+          rows={1}
+          maxRows={6}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat"
+          placeholder="Type something..."
+          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-hidden"
+          style={{ lineHeight: "1.5", height: `${Math.min(inputRef.current?.scrollHeight || 0, 120)}px` }}
         />
         <div
           className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
