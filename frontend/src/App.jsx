@@ -8,7 +8,7 @@ import MyWorkPage from "./pages/Mywork";
 import Mesh from "./components/Mesh";
 import CookieBanner from "./components/consentSection/Banner";
 import CookiePolicy from "./components/consentSection/Policy";
-import LoadingScreen from "./components/loadingScreen.jsx/LoadingScreen"; // Import the loading screen
+import LoadingScreen from "./components/loadingScreen.jsx/LoadingScreen";
 
 function App() {
   const [loaded, setLoaded] = useState(false); // Track loading state
@@ -19,7 +19,8 @@ function App() {
   };
 
   if (!loaded) {
-    return <LoadingScreen setLoaded={setLoaded} />; // Show loading screen if not loaded
+    // Enable font loading by passing `loadFonts` prop as true
+    return <LoadingScreen setLoaded={setLoaded} loadFonts={true} />;
   }
 
   return (
