@@ -44,7 +44,7 @@ const Footer = () => {
   };
 
   return (
-    <footer ref={footerRef} className="bg-[#E1E1E1] text-white pt-10 pb-6 w-screen absolute left-0">
+    <footer ref={footerRef} className="bg-[#E1E1E1] text-white pt-10 pb-6 w-screen">
       <div className="container mx-auto md:px-8 lg:px-16">
         {/* Social Media Links */}
         <div ref={socialRef} className="flex justify-center space-x-8 mb-16">
