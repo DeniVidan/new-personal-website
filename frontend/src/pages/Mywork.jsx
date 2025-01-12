@@ -51,7 +51,7 @@ const MyWorkPage = () => {
   }, []);
 
   return (
-    <div className="text-white md:max-w-7xl">
+    <div className="text-white md:max-w-7xl mx-auto">
       <h1 className="text-4xl md:text-6xl mb-28 font-bold leading-[3rem] font-montserrat px-6">Guiding ideas into impactful digital experiences.</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:max-w-7xl md:mx-auto px-6">
         {myWorks.map((work, index) => (
@@ -61,7 +61,7 @@ const MyWorkPage = () => {
       <Progress />
       <Contact />
       <TitleBraker message="TODAY’S DECISION MAKES FUTURE SIMPLE" />
-      <Footer />
+      <Footer className="w-full"/>
     </div>
   );
 };
