@@ -31,7 +31,7 @@ const LoadingScreen = ({ setLoaded }) => {
       className="fixed inset-0 flex flex-col items-center justify-center bg-black text-white z-50"
     >
       <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-      <div className="w-64 h-2 rounded">
+      <div className="bg-gray-700 w-64 h-2 rounded">
         <div
           className="h-2 rounded"
           style={{
