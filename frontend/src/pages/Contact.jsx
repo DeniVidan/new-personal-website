@@ -9,32 +9,14 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const containerRef = useRef(null);
 
   useEffect(() => {
-    setMessages([
-      {
-        sender: "DENI AI",
-        text: "Hi there! What is your name?",
-        animation: true,
-      },
-    ]);
+    setMessages([{ sender: "DENI AI", text: "Hi there! What is your name?", animation: true }]);
   }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (inputRef.current) {
-        inputRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    };
-
-    window.addEventListener("resize", handleResize); // Trigger on keyboard open/close
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -42,10 +24,7 @@ const ContactPage = ({ onForceShowBanner }) => {
     const userMessage = input.trim();
     setInput("");
 
-    setMessages((prev) => [
-      ...prev,
-      { sender: "You", text: userMessage, animation: true },
-    ]);
+    setMessages((prev) => [...prev, { sender: "You", text: userMessage, animation: true }]);
     setLoading(true);
 
     try {
@@ -81,10 +60,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       console.error("Error in handleSend:", error);
       setMessages((prev) => [
         ...prev,
-        {
-          sender: "DENI AI",
-          text: "An error occurred. Please try again.",
-        },
+        { sender: "DENI AI", text: "An error occurred. Please try again." },
       ]);
     } finally {
       setLoading(false);
@@ -92,6 +68,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   };
 
   const handleKeyPress = (e) => {
+    // Enter to send, Shift+Enter for new line
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -105,18 +82,12 @@ const ContactPage = ({ onForceShowBanner }) => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat"
-    >
-      <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24">
+    <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
+      <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24 overflow-y-auto">
         {messages.map((msg, index) => {
           if (msg.acceptCookiesPrompt) {
             return (
-              <div
-                key={index}
-                className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
-              >
+              <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}>
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left">
                   <p>{msg.text}</p>
@@ -132,10 +103,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           }
 
           return (
-            <div
-              key={index}
-              className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
-            >
+            <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}>
               <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
               <div
                 className={`${
@@ -149,14 +117,9 @@ const ContactPage = ({ onForceShowBanner }) => {
             </div>
           );
         })}
-
         {loading && (
           <div className="text-center">
-            <img
-              src="/loading-circle.gif"
-              alt="Loading..."
-              className="w-8 h-8 mx-auto"
-            />
+            <img src="/loading-circle.gif" alt="Loading..." className="w-8 h-8 mx-auto" />
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -170,16 +133,30 @@ const ContactPage = ({ onForceShowBanner }) => {
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
+            // Dynamically adjust the height of the textarea
             const textarea = inputRef.current;
             textarea.style.height = "auto";
-            textarea.style.height = `${Math.min(
-              textarea.scrollHeight,
-              120
-            )}px`;
+            textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
           }}
           onKeyPress={handleKeyPress}
           placeholder="Type something..."
-          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-auto overflow-x-hidden custom-scrollbar"
+          className="
+            resize-none
+            flex-1
+            py-3
+            rounded-3xl
+            bg-white
+            text-gray-700
+            focus:outline-none
+            pl-5
+            w-[65%]
+            font-montserrat
+            overflow-y-auto
+            overflow-x-hidden
+            custom-scrollbar
+            overscroll-contain
+            touch-pan-y
+          "
           style={{
             lineHeight: "1.5",
             maxHeight: "120px",
@@ -193,11 +170,7 @@ const ContactPage = ({ onForceShowBanner }) => {
             width: "48px",
           }}
         >
-          <img
-            src="chess-horse.svg"
-            alt="Chess Horse"
-            className="w-3/4 h-3/4 object-contain"
-          />
+          <img src="chess-horse.svg" alt="Chess Horse" className="w-3/4 h-3/4 object-contain" />
         </div>
       </div>
     </div>
