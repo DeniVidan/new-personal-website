@@ -36,7 +36,7 @@ const LoadingScreen = ({ setLoaded }) => {
           className="h-2 rounded"
           style={{
             width: `${progress}%`,
-            background: `bg-gradient-to-r from-pink-500 to-orange-500`,
+            background: `linear-gradient(to right, pink, orange)`,
           }}
         ></div>
       </div>
