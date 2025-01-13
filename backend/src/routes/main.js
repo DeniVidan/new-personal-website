@@ -7,7 +7,11 @@ const ConversationManager = require("../controllers/conversationManager")
 const { getSessionData, updateSessionData, clearSession, createOrUpdateSession} = require("../firebase/firebaseSessionStore")
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
+const { format } = require("date-fns"); // Add at the top of your file
 
+function getTimestamp() {
+  return format(new Date(), "yyyy-MM-dd HH:mm:ss");
+}
 
 
 const router = express.Router();
@@ -92,8 +96,10 @@ router.post("/chatgpt", async (req, res) => {
 router.post("/chat", async (req, res) => {
   const { userInput } = req.body;
   const existingToken = req.cookies.sessionToken;
-  console.log("Incoming Cookies:", req.cookies);
-  console.log("Request Headers:", req.headers);
+
+  console.log(`[${getTimestamp()}] Incoming Cookies:`, req.cookies);
+  console.log(`[${getTimestamp()}] Request Headers:`, req.headers);
+
   try {
     let sessionToken = existingToken;
     let sessionData;
@@ -105,7 +111,7 @@ router.post("/chat", async (req, res) => {
     res.setHeader("Pragma", "no-cache");
 
     if (!sessionToken) {
-      // 1) Create token & session if no cookie yet
+      // Create token & session if no cookie yet
       sessionToken = uuidv4();
       sessionData = { userData: {}, step: "name" };
 
@@ -114,22 +120,22 @@ router.post("/chat", async (req, res) => {
 
       // Set cookie (cross-origin compatible)
       res.cookie("sessionToken", sessionToken, {
-        domain: ".denividan.com",  // notice the dot prefix
+        domain: ".denividan.com", // notice the dot prefix
         path: "/",
-        secure: true,              // require HTTPS
-        sameSite: "none",          // if you need cross-subdomain usage
+        secure: true, // require HTTPS
+        sameSite: "none", // if you need cross-subdomain usage
         httpOnly: true,
         maxAge: 3 * 60 * 1000, // 3 minutes
       });
 
-      console.log("New session created:", sessionToken);
+      console.log(`[${getTimestamp()}] New session created:`, sessionToken);
     } else {
       try {
         sessionData = await getSessionData(sessionToken);
-        console.log("Existing session loaded:", sessionData);
+        console.log(`[${getTimestamp()}] Existing session loaded:`, sessionData);
       } catch (error) {
         if (error.message === "Session has expired.") {
-          console.log("Session expired for token:", sessionToken);
+          console.log(`[${getTimestamp()}] Session expired for token:`, sessionToken);
           return res.status(400).json({
             error: "Wait a few more minutes before chatting again.",
           });
@@ -140,6 +146,7 @@ router.post("/chat", async (req, res) => {
     }
 
     // Process user input
+    console.log(`[${getTimestamp()}] Processing user input...`);
     const { aiMessage, updatedSession } = await conversationManager.processInput(
       userInput,
       openai,
@@ -148,12 +155,14 @@ router.post("/chat", async (req, res) => {
     );
 
     // Update session in Firestore
+    console.log(`[${getTimestamp()}] Updating session in Firestore...`);
     await createOrUpdateSession(sessionToken, updatedSession);
 
     // Respond with AI message
+    console.log(`[${getTimestamp()}] Sending AI message response.`);
     return res.json({ aiMessage });
   } catch (error) {
-    console.error("Error in /chat route:", error);
+    console.error(`[${getTimestamp()}] Error in /chat route:`, error);
     return res.status(500).json({ error: "An error occurred. Please try again later." });
   }
 });
