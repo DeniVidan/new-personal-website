@@ -53,7 +53,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       if (response.data.showServiceSuggestions) {
         setMessages((prev) => [
           ...prev,
-          { sender: "DENI AI", text: "Thanks [name], what service are you interested in?" },
+          { sender: "DENI AI", text: response.data.aiMessage, animation: true },
         ]);
         setShowSuggestions(true);
       } else if (response.data.aiMessage) {
