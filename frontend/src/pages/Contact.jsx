@@ -12,6 +12,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [loading, setLoading] = useState(false);
   const [thinkingMessageId, setThinkingMessageId] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [step, setStep] = useState(1); // Track conversation step
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -78,7 +79,9 @@ const ContactPage = ({ onForceShowBanner }) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
-        // Insert final chatbot message
+        // Update step for suggestions
+        setStep(3); // Update step to "interest selection"
+        // Insert chatbot message
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
@@ -86,7 +89,9 @@ const ContactPage = ({ onForceShowBanner }) => {
         // Delay suggestions
         setTimeout(() => setShowSuggestions(true), 500);
       } else if (response.data.aiMessage) {
-        // Normal AI message
+        // Update step if response moves conversation forward
+        setStep((prevStep) => prevStep + 1);
+        // Normal chatbot message
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
@@ -121,13 +126,13 @@ const ContactPage = ({ onForceShowBanner }) => {
     }
   };
 
-  // 5) Re-show suggestions if user clears text
+  // 5) Show suggestions only during step 3
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
 
-    if (value.trim() === "") {
-      setShowSuggestions(true);
+    if (value.trim() === "" && step === 3) {
+      setShowSuggestions(true); // Show suggestions only during step 3
     } else {
       setShowSuggestions(false);
     }
@@ -140,7 +145,7 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
-      {/* Chat container with items pinned at bottom + scrollable */}
+      {/* Chat container with scrollable messages */}
       <div
         className="
           flex-1
@@ -150,9 +155,10 @@ const ContactPage = ({ onForceShowBanner }) => {
           px-4
           pt-4
           pb-2
-          overflow-y-auto
+          overflow-y-scroll
           no-scrollbar
         "
+        style={{ overflowY: "auto", scrollBehavior: "smooth" }}
       >
         {/* Render messages */}
         {messages.map((msg, index) => {
@@ -176,10 +182,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           // "Thinking..." placeholder
           if (msg.thinking) {
             return (
-              <div
-                key={index}
-                className="mb-4 animate-pop text-left"
-              >
+              <div key={index} className="mb-4 animate-pop text-left">
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
                   className="p-3 rounded-3xl inline-block px-6 max-w-[80%]"
@@ -198,7 +201,7 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal user / AI messages
+          // Normal messages
           return (
             <div
               key={index}
@@ -220,12 +223,9 @@ const ContactPage = ({ onForceShowBanner }) => {
           );
         })}
 
-        {/* Suggestions with 0.5s delayed pop */}
+        {/* Suggestions */}
         {showSuggestions && (
-          <div
-            className="flex flex-col items-end mb-4 animate-pop"
-            style={{ animationDelay: "0.5s" }}
-          >
+          <div className="flex flex-col items-end mb-4 animate-pop">
             {SERVICE_CHOICES.map((choice, index) => (
               <button
                 key={index}
@@ -247,7 +247,6 @@ const ContactPage = ({ onForceShowBanner }) => {
                   duration-200
                   animate-pop
                 "
-                style={{ animationDelay: "0.5s" }}
               >
                 {choice}
               </button>
@@ -268,22 +267,7 @@ const ContactPage = ({ onForceShowBanner }) => {
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             placeholder="Type something..."
-            className="
-              resize-none
-              flex-1
-              py-3
-              rounded-3xl
-              bg-white
-              text-gray-700
-              focus:outline-none
-              pl-5
-              w-[65%]
-              font-montserrat
-              overflow-y-auto
-              overflow-x-hidden
-              overscroll-contain
-              touch-pan-y
-            "
+            className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat"
             style={{
               lineHeight: "1.5",
               maxHeight: "120px",
