@@ -122,7 +122,7 @@ const AboutPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center text-white">
+    <div className="flex flex-col items-center text-white mt-36">
       <div className="relative w-full">
         <div className="relative w-full h-80 md:h-[80vh] mb-20">
           <p ref={el => textRefs.current[0] = el} className="text-3xl md:text-5xl font-bold mb-2 font-custom transform -rotate-12 absolute left-12 md:left-1/4 top-4">PASSIONATE</p>

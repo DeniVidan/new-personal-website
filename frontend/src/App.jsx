@@ -33,23 +33,14 @@ function App() {
 
       <div className="absolute top-0 left-0 w-full h-screen z-10">
         <Routes>
-          <div className="mt-36">
-            <Route path="/" element={<Homepage />} />
-            <Route path="/about" element={<AboutPage />} />
-
-            <Route
-              path="/projects"
-              element={<MyWorkPage />}
-            />
-            <Route
-              path="/cookie-policy"
-              element={<CookiePolicy />}
-            />
-          </div>
+          <Route className="" path="/" element={<Homepage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route
-              path="/contact"
-              element={<ContactPage onForceShowBanner={forceShowBanner} />}
-            />
+            path="/contact"
+            element={<ContactPage onForceShowBanner={forceShowBanner} />}
+          />
+          <Route path="/projects" element={<MyWorkPage />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
         </Routes>
       </div>
     </Router>

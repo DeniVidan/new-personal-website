@@ -23,7 +23,7 @@ const Homepage = () => {
     }, []);
 
     return (
-      <div className="flex flex-col items-center overflow-x-hidden">
+      <div className="flex flex-col items-center overflow-x-hidden mt-36">
         <Hero />
         <Services />
         <div ref={textRef} className="mb-96">
