@@ -218,7 +218,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       </div>
 
       {/* Input field */}
-      <div className="p-4 sticky bottom-0 bg-black">
+      <div className="p-4 sticky bottom-0">
         <div className="flex mx-auto lg:max-w-[45%]">
           <textarea
             ref={inputRef}
