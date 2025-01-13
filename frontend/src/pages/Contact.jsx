@@ -16,7 +16,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Warm-up request
+  // 1) Warm up the backend
   useEffect(() => {
     const warmUpBackend = async () => {
       try {
@@ -29,31 +29,41 @@ const ContactPage = ({ onForceShowBanner }) => {
     warmUpBackend();
   }, []);
 
-  // Initial AI greeting
+  // 2) Initial greeting
   useEffect(() => {
     setMessages([
       { sender: "DENI AI", text: "Hi there! What is your name?", animation: true },
     ]);
   }, []);
 
-  // Scroll to latest message on every messages update
+  // 3) Scroll down whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Helper: scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  /**
+   * handleSend:
+   * - Replaces "Thinking..." with final chatbot message
+   * - Retains "pop" animation for that message
+   */
   const handleSend = async (message) => {
     const userMessage = message || input.trim();
     if (!userMessage) return;
     setInput("");
 
-    // Add user's message
+    // 1) User message
     setMessages((prev) => [
       ...prev,
       { sender: "You", text: userMessage, animation: true },
     ]);
     setShowSuggestions(false);
 
-    // Add "Thinking..." placeholder
+    // 2) "Thinking..." placeholder
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
     setMessages((prev) => [
@@ -64,22 +74,29 @@ const ContactPage = ({ onForceShowBanner }) => {
     setLoading(true);
 
     try {
+      // 3) Send to backend
       const response = await axios.post(
         `${API_BASE_URL}/api/chat`,
         { userInput: userMessage },
         { withCredentials: true, headers: { "Content-Type": "application/json" } }
       );
 
-      // Remove "Thinking..."
+      // 4) Remove "Thinking..."
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
+      // 5) If "showServiceSuggestions"
       if (response.data.showServiceSuggestions) {
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
         ]);
-        setShowSuggestions(true);
-      } else if (response.data.aiMessage) {
+        // Delay suggestions by 0.5s, then show
+        setTimeout(() => {
+          setShowSuggestions(true);
+        }, 500);
+      }
+      // Otherwise normal AI message
+      else if (response.data.aiMessage) {
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
@@ -87,17 +104,26 @@ const ContactPage = ({ onForceShowBanner }) => {
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-      // Remove "Thinking..."
+
+      // Remove placeholder
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+
+      // Show error
       setMessages((prev) => [
         ...prev,
-        { sender: "DENI AI", text: "An error occurred. Please try again.", animation: true },
+        {
+          sender: "DENI AI",
+          text: "An error occurred. Please try again.",
+          animation: true,
+        },
       ]);
     } finally {
       setLoading(false);
+      scrollToBottom();
     }
   };
 
+  // Sending on Enter
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -105,18 +131,18 @@ const ContactPage = ({ onForceShowBanner }) => {
     }
   };
 
+  // Hides/shows suggestions if user typed/cleared input
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
 
-    // If user clears the input, re-show suggestions
     if (value.trim() === "") {
+      // If user fully clears input, restore suggestions if they were active
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
 
-    // Dynamic textarea height
     const textarea = inputRef.current;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -124,15 +150,17 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
-      {/* Chat container */}
-      <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24 overflow-y-scroll">
+      {/*  Chat Container  */}
+      <div className="flex-1 flex flex-col p-4 pt-4 overflow-y-scroll">
         {messages.map((msg, index) => {
-          // Accept cookies prompt
+          // Accept cookies logic
           if (msg.acceptCookiesPrompt) {
             return (
               <div
                 key={index}
-                className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
+                className={`mb-4 ${
+                  msg.sender === "You" ? "text-right" : "text-left"
+                } animate-pop`}
               >
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%]">
@@ -145,7 +173,10 @@ const ContactPage = ({ onForceShowBanner }) => {
           // "Thinking..." placeholder
           if (msg.thinking) {
             return (
-              <div key={index} className="mb-4 animate-pop">
+              <div
+                key={index}
+                className="mb-4 animate-pop text-left"
+              >
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
                   className="p-3 rounded-3xl inline-block px-6 max-w-[80%]"
@@ -164,7 +195,7 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal messages (user or AI)
+          // Normal messages (user or chatbot)
           return (
             <div
               key={index}
@@ -190,64 +221,82 @@ const ContactPage = ({ onForceShowBanner }) => {
         {showSuggestions && (
           <div
             className="flex flex-col items-end mb-4 animate-pop"
-            style={{ animationDelay: "0.5s" }} // Delayed so it appears after AI text
+            style={{ animationDelay: "0.5s" }} // Appear 0.5s after AI text
           >
             {SERVICE_CHOICES.map((choice, index) => (
               <button
                 key={index}
                 onClick={() => handleSend(choice)}
-                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-2 border-orange-500 bg-transparent hover:bg-orange-500 hover:text-black transition-colors duration-200"
+                className="
+                  text-white
+                  font-medium
+                  py-2
+                  px-4
+                  rounded-full
+                  shadow
+                  mt-2
+                  border-2
+                  border-orange-500
+                  bg-transparent
+                  hover:bg-orange-500
+                  hover:text-black
+                  transition-colors
+                  duration-200
+                  animate-pop
+                "
+                style={{ animationDelay: "0.5s" }} // each button also has 0.5s delay
               >
                 {choice}
               </button>
             ))}
           </div>
         )}
-
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input field */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 flex items-center mx-auto md:max-w-[45%]">
-        <textarea
-          ref={inputRef}
-          rows={1}
-          value={input}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Type something..."
-          className="
-            resize-none
-            flex-1
-            py-3
-            rounded-3xl
-            bg-white
-            text-gray-700
-            focus:outline-none
-            pl-5
-            w-[65%]
-            font-montserrat
-            overflow-y-auto
-            overflow-x-hidden
-            custom-scrollbar
-            overscroll-contain
-            touch-pan-y
-          "
-          style={{
-            lineHeight: "1.5",
-            maxHeight: "120px",
-          }}
-        />
-        <div
-          className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
-          onClick={() => handleSend()}
-          style={{ height: "48px", width: "48px" }}
-        >
-          <img
-            src="chess-horse.svg"
-            alt="Chess Horse"
-            className="w-3/4 h-3/4 object-contain"
+      <div className="p-4 bg-gray-900">
+        <div className="flex mx-auto md:max-w-[45%]">
+          <textarea
+            ref={inputRef}
+            rows={1}
+            value={input}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            placeholder="Type something..."
+            className="
+              resize-none
+              flex-1
+              py-3
+              rounded-3xl
+              bg-white
+              text-gray-700
+              focus:outline-none
+              pl-5
+              w-[65%]
+              font-montserrat
+              overflow-y-auto
+              overflow-x-hidden
+              custom-scrollbar
+              overscroll-contain
+              touch-pan-y
+            "
+            style={{
+              lineHeight: "1.5",
+              maxHeight: "120px",
+            }}
           />
+          <div
+            className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
+            onClick={() => handleSend()}
+            style={{ height: "48px", width: "48px" }}
+          >
+            <img
+              src="chess-horse.svg"
+              alt="Chess Horse"
+              className="w-3/4 h-3/4 object-contain"
+            />
+          </div>
         </div>
       </div>
     </div>
