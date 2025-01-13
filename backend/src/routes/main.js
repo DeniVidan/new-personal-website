@@ -147,7 +147,7 @@ router.post("/chat", async (req, res) => {
 
     // Process user input
     console.log(`[${getTimestamp()}] Processing user input...`);
-    const { aiMessage, updatedSession } = await conversationManager.processInput(
+    const { aiMessage, updatedSession, showServiceSuggestions  } = await conversationManager.processInput(
       userInput,
       openai,
       sessionData,
@@ -160,7 +160,7 @@ router.post("/chat", async (req, res) => {
 
     // Respond with AI message
     console.log(`[${getTimestamp()}] Sending AI message response.`);
-    return res.json({ aiMessage });
+    return res.json({ aiMessage, showServiceSuggestions: !!showServiceSuggestions, });
   } catch (error) {
     console.error(`[${getTimestamp()}] Error in /chat route:`, error);
     return res.status(500).json({ error: "An error occurred. Please try again later." });

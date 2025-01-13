@@ -17,13 +17,13 @@ class ConversationManager {
    * processInput:
    * 1) Use GPT to classify userInput -> { type, value, valid }
    * 2) handleProcessedInput(...) -> next polite message
-   * 3) Return { aiMessage, updatedSession }
+   * 3) Return { aiMessage, updatedSession, showServiceSuggestions? }
    */
   async processInput(userInput, openai, sessionData, sessionToken) {
     const userData = sessionData.userData;
     const step = sessionData.step;
 
-    // --- FIRST GPT CALL: Classification ---
+    // Classification prompt ...
     const classificationPrompt = `
 You are an AI assistant collecting 3 pieces of data: name, email, and service interest.
 Currently, we STILL need: ${step}
@@ -34,8 +34,8 @@ User said: "${userInput}"
 Instructions:
 1) Return ONLY JSON in format: { "type": "name|email|service", "value": string, "valid": boolean }.
 2) If user mentions "website", "web design", "logo", "seo", "maintenance" etc., set "type":"service".
-3) If user says "I am John" or "My name is Mary," set "type":"name", "valid":true, "value":"John" or "Mary".
-4) If it looks like "someone@domain.com", "type":"email", "valid":true. If not valid, "valid":false.
+3) If user says "I am John" or "My name is Mary," set "type":"name", valid=true, etc.
+4) If it looks like "someone@domain.com", "type":"email", valid=true. If not valid, valid=false.
 5) Return ONLY that JSON, no extra text.
     `;
 
@@ -55,200 +55,169 @@ Instructions:
         rawResponse.replace(/```json|```/g, "").trim()
       );
 
-      // --- Route to the second GPT call for a polite message ---
-      const aiMessage = await this.handleProcessedInput(
+      // Now route to handleProcessedInput
+      const result = await this.handleProcessedInput(
         parsedResponse,
         sessionData,
         openai,
         sessionToken
       );
 
-      return { aiMessage, updatedSession: sessionData };
+      // result can be something like: { aiMessage, updatedSession, showServiceSuggestions? }
+      return { ...result, updatedSession: sessionData };
     } catch (error) {
       console.error("Error parsing classification:", error);
-      return "Sorry, I didn’t understand that. Could you please repeat?";
+      return { aiMessage: "Sorry, I didn’t understand that. Could you please repeat?" };
     }
   }
 
   /**
    * handleProcessedInput:
    * Decide next step based on classification results
-   * Then call generatePoliteReply(...) for the actual user-facing message.
    */
   async handleProcessedInput(parsed, sessionData, openai, sessionToken) {
     const { type, value, valid } = parsed;
     const userData = sessionData.userData;
     let step = sessionData.step;
 
-    // If user typed a valid piece of data out of order, let's store it anyway:
     if (type === "service" && valid) userData.interest = value;
     if (type === "email" && valid) userData.email = value;
     if (type === "name" && valid) userData.name = value;
 
-    // Now handle each step, checking what we still need:
     switch (step) {
       case "name":
         if (userData.name) {
-          // We have name, move on to email or skip to service if email is known
           if (userData.email) {
-            // If we also have service, done
             if (userData.interest) {
               sessionData.step = "complete";
               await this.sendOffer(openai, sessionData, sessionToken);
-              return await this.generatePoliteReply(
-                {
-                  scenario: "allDataCollected",
-                  userData,
-                },
+              const aiMessage = await this.generatePoliteReply(
+                { scenario: "allDataCollected", userData },
                 openai
               );
+              return { aiMessage };
             } else {
+              // Next step: service
               sessionData.step = "service";
-              return await this.generatePoliteReply(
-                {
-                  scenario: "askService",
-                  userData,
-                },
+              // We'll ask for service in a PoliteReply
+              const aiMessage = await this.generatePoliteReply(
+                { scenario: "askService", userData },
                 openai
               );
+              // Return additional field for the frontend
+              return { aiMessage, showServiceSuggestions: true };
             }
           } else {
             sessionData.step = "email";
-            return await this.generatePoliteReply(
-              {
-                scenario: "gotNameNeedEmail",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "gotNameNeedEmail", userData },
               openai
             );
+            return { aiMessage };
           }
         }
-        // If no valid name found:
-        return await this.generatePoliteReply(
-          {
-            scenario: "invalidOrMissingName",
-            userData,
-          },
-          openai
-        );
+        // If no valid name
+        return {
+          aiMessage: await this.generatePoliteReply(
+            { scenario: "invalidOrMissingName", userData },
+            openai
+          ),
+        };
 
       case "email":
         if (userData.email) {
-          // If we have service & name, done
           if (userData.interest && userData.name) {
             sessionData.step = "complete";
             await this.sendOffer(openai, sessionData, sessionToken);
-            return await this.generatePoliteReply(
-              {
-                scenario: "allDataCollected",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "allDataCollected", userData },
               openai
             );
+            return { aiMessage };
           }
-          // If missing service, ask for it
           if (!userData.interest) {
             sessionData.step = userData.name ? "service" : "name";
             if (sessionData.step === "service") {
-              return await this.generatePoliteReply(
-                {
-                  scenario: "askService",
-                  userData,
-                },
+              const aiMessage = await this.generatePoliteReply(
+                { scenario: "askService", userData },
                 openai
               );
+              return { aiMessage, showServiceSuggestions: true };
             } else {
-              return await this.generatePoliteReply(
-                {
-                  scenario: "needNameButHaveEmail",
-                  userData,
-                },
+              const aiMessage = await this.generatePoliteReply(
+                { scenario: "needNameButHaveEmail", userData },
                 openai
               );
+              return { aiMessage };
             }
           }
-          // If missing name but user typed service first, handle that
           if (!userData.name) {
             sessionData.step = "name";
-            return await this.generatePoliteReply(
-              {
-                scenario: "needNameButHaveEmail",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "needNameButHaveEmail", userData },
               openai
             );
+            return { aiMessage };
           }
         }
-        // No valid email found
-        return await this.generatePoliteReply(
-          {
-            scenario: "invalidOrMissingEmail",
-            userData,
-          },
-          openai
-        );
+        // No valid email
+        return {
+          aiMessage: await this.generatePoliteReply(
+            { scenario: "invalidOrMissingEmail", userData },
+            openai
+          ),
+        };
 
       case "service":
         if (userData.interest) {
-          // If we have name & email => done
           if (userData.name && userData.email) {
             sessionData.step = "complete";
             await this.sendOffer(openai, sessionData, sessionToken);
-            return await this.generatePoliteReply(
-              {
-                scenario: "allDataCollected",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "allDataCollected", userData },
               openai
             );
+            return { aiMessage };
           }
-          // Missing name or email
           if (!userData.name && !userData.email) {
             sessionData.step = "name";
-            return await this.generatePoliteReply(
-              {
-                scenario: "missingNameEmail",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "missingNameEmail", userData },
               openai
             );
+            return { aiMessage };
           }
           if (!userData.name) {
             sessionData.step = "name";
-            return await this.generatePoliteReply(
-              {
-                scenario: "askNameButHaveService",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "askNameButHaveService", userData },
               openai
             );
+            return { aiMessage };
           }
           if (!userData.email) {
             sessionData.step = "email";
-            return await this.generatePoliteReply(
-              {
-                scenario: "askEmailButHaveService",
-                userData,
-              },
+            const aiMessage = await this.generatePoliteReply(
+              { scenario: "askEmailButHaveService", userData },
               openai
             );
+            return { aiMessage };
           }
         }
-        // No valid service
-        return await this.generatePoliteReply(
-          {
-            scenario: "invalidService",
-            userData,
-          },
-          openai
-        );
+        return {
+          aiMessage: await this.generatePoliteReply(
+            { scenario: "invalidService", userData },
+            openai
+          ),
+        };
 
       default:
-        // Step "complete" or unknown
-        return "This conversation is complete or in an unknown state. Try again in a few minutes.";
+        return {
+          aiMessage:
+            "This conversation is complete or in an unknown state. Try again in a few minutes.",
+        };
     }
   }
-
   /**
    * sendOffer:
    * 1) Check matched services vs fallback
