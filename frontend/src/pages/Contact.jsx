@@ -4,7 +4,7 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Define the list of services you want to appear as clickable options
-const SERVICE_CHOICES = ["Website", "Website Design", "Logo Design", "Branding"/* , "SEO" */];
+const SERVICE_CHOICES = ["Website", "Website Design", "Logo Design", "Branding"];
 
 const ContactPage = ({ onForceShowBanner }) => {
   const [messages, setMessages] = useState([]);
@@ -22,6 +22,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   }, []);
 
   useEffect(() => {
+    // Ensure the last message is always visible
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -30,9 +31,14 @@ const ContactPage = ({ onForceShowBanner }) => {
     if (!userMessage) return;
     setInput("");
 
-    setMessages((prev) => [...prev, { sender: "You", text: userMessage }]);
+    // Add user's message to chat
+    setMessages((prev) => [
+      ...prev,
+      { sender: "You", text: userMessage, animation: true },
+    ]);
     setShowSuggestions(false);
 
+    // Add "Thinking..." placeholder
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
     setMessages((prev) => [
@@ -48,6 +54,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         { withCredentials: true, headers: { "Content-Type": "application/json" } }
       );
 
+      // Remove "Thinking..." placeholder
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
@@ -64,12 +71,10 @@ const ContactPage = ({ onForceShowBanner }) => {
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-      setMessages((prev) =>
-        prev.filter((msg) => msg.id !== tempId)
-      );
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
       setMessages((prev) => [
         ...prev,
-        { sender: "DENI AI", text: "An error occurred. Please try again." },
+        { sender: "DENI AI", text: "An error occurred. Please try again.", animation: true },
       ]);
     } finally {
       setLoading(false);
@@ -97,7 +102,10 @@ const ContactPage = ({ onForceShowBanner }) => {
         {messages.map((msg, index) => {
           if (msg.acceptCookiesPrompt) {
             return (
-              <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}>
+              <div
+                key={index}
+                className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
+              >
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left">
                   <p>{msg.text}</p>
@@ -108,7 +116,10 @@ const ContactPage = ({ onForceShowBanner }) => {
 
           if (msg.thinking) {
             return (
-              <div key={index} className="mb-4">
+              <div
+                key={index}
+                className="mb-4 animate-pop"
+              >
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
                   className="p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left"
@@ -130,7 +141,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           return (
             <div
               key={index}
-              className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
+              className={`mb-4 ${msg.sender === "You" ? "text-right" : ""} animate-pop`}
             >
               <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
               <div
@@ -153,7 +164,7 @@ const ContactPage = ({ onForceShowBanner }) => {
               <button
                 key={index}
                 onClick={() => handleSend(choice)}
-                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 hover:from-pink-600 hover:to-orange-600 border border-gradient-to-r from-orange-500 to-pink-500 bg-transparent"
+                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-2 border-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition-colors duration-200"
               >
                 {choice}
               </button>
@@ -172,23 +183,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           placeholder="Type something..."
-          className="
-            resize-none
-            flex-1
-            py-3
-            rounded-3xl
-            bg-white
-            text-gray-700
-            focus:outline-none
-            pl-5
-            w-[65%]
-            font-montserrat
-            overflow-y-auto
-            overflow-x-hidden
-            custom-scrollbar
-            overscroll-contain
-            touch-pan-y
-          "
+          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain touch-pan-y"
           style={{
             lineHeight: "1.5",
             maxHeight: "120px",
