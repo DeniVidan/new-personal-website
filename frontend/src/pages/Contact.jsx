@@ -16,11 +16,10 @@ const ContactPage = ({ onForceShowBanner }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Remove or handle warm-up gracefully
+  // Warm-up backend (non-blocking)
   useEffect(() => {
     const warmUpBackend = async () => {
       try {
-        // Optional warmup. If it fails, just log a warning—don't break the chat.
         await axios.get(`${API_BASE_URL}/api/warmup`, { timeout: 3000 });
         console.log("Backend warmed up successfully.");
       } catch (error) {
@@ -104,7 +103,11 @@ const ContactPage = ({ onForceShowBanner }) => {
       // Show error
       setMessages((prev) => [
         ...prev,
-        { sender: "DENI AI", text: "An error occurred. Please try again.", animation: true },
+        {
+          sender: "DENI AI",
+          text: "An error occurred. Please try again.",
+          animation: true,
+        },
       ]);
     } finally {
       setLoading(false);
@@ -147,22 +150,24 @@ const ContactPage = ({ onForceShowBanner }) => {
           flex-1
           flex
           flex-col
-          p-4
+          px-4
           pt-4
+          pb-2
           overflow-y-scroll
           custom-scrollbar
         "
-        style={{
-          // Example of minimal scrollbar styling (for desktop)
-          scrollbarWidth: "thin",        // Firefox
-          scrollbarColor: "#999 #444",   // Firefox
-        }}
       >
+        {/* Render messages */}
         {messages.map((msg, index) => {
           // Accept cookies
           if (msg.acceptCookiesPrompt) {
             return (
-              <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : "text-left"} animate-pop`}>
+              <div
+                key={index}
+                className={`mb-4 ${
+                  msg.sender === "You" ? "text-right" : "text-left"
+                } animate-pop`}
+              >
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%]">
                   <p>{msg.text}</p>
@@ -215,7 +220,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           );
         })}
 
-        {/* Delayed suggestions */}
+        {/* Suggestions */}
         {showSuggestions && (
           <div
             className="flex flex-col items-end mb-4 animate-pop"
@@ -250,7 +255,6 @@ const ContactPage = ({ onForceShowBanner }) => {
           </div>
         )}
 
-        {/* So we can always scroll to last message */}
         <div ref={messagesEndRef} />
       </div>
 
