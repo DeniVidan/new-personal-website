@@ -16,7 +16,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Warm-up backend (non-blocking)
+  // 1) Warm up backend (non-blocking)
   useEffect(() => {
     const warmUpBackend = async () => {
       try {
@@ -29,14 +29,14 @@ const ContactPage = ({ onForceShowBanner }) => {
     warmUpBackend();
   }, []);
 
-  // Initial greeting
+  // 2) Initial greeting
   useEffect(() => {
     setMessages([
       { sender: "DENI AI", text: "Hi there! What is your name?", animation: true },
     ]);
   }, []);
 
-  // Scroll to the latest message whenever messages change
+  // 3) Scroll to bottom whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -44,7 +44,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   /**
    * handleSend:
    *  - Sends user message to backend
-   *  - Replaces "Thinking..." with final AI message
+   *  - Removes "Thinking..." placeholder & inserts final chatbot message
    */
   const handleSend = async (message) => {
     const userMessage = message || input.trim();
@@ -58,7 +58,7 @@ const ContactPage = ({ onForceShowBanner }) => {
     ]);
     setShowSuggestions(false);
 
-    // Add "Thinking..." placeholder
+    // Add "Thinking..."
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
     setMessages((prev) => [
@@ -68,7 +68,6 @@ const ContactPage = ({ onForceShowBanner }) => {
     setLoading(true);
 
     try {
-      // POST to /api/chat
       const response = await axios.post(
         `${API_BASE_URL}/api/chat`,
         { userInput: userMessage },
@@ -79,15 +78,13 @@ const ContactPage = ({ onForceShowBanner }) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
-        // Show AI message
+        // Insert final chatbot message
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
         ]);
-        // Delay suggestions by 0.5s
-        setTimeout(() => {
-          setShowSuggestions(true);
-        }, 500);
+        // Delay suggestions
+        setTimeout(() => setShowSuggestions(true), 500);
       } else if (response.data.aiMessage) {
         // Normal AI message
         setMessages((prev) => [
@@ -111,12 +108,12 @@ const ContactPage = ({ onForceShowBanner }) => {
       ]);
     } finally {
       setLoading(false);
-      // Scroll to bottom on each send
+      // Scroll to bottom
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // Send on Enter
+  // 4) Send on Enter
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -124,19 +121,18 @@ const ContactPage = ({ onForceShowBanner }) => {
     }
   };
 
-  // Re-show suggestions if user clears text
+  // 5) Re-show suggestions if user clears text
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
 
-    // If user fully clears input, re-show suggestions
     if (value.trim() === "") {
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
 
-    // Dynamic textarea height
+    // Resize textarea
     const textarea = inputRef.current;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -144,22 +140,23 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
-      {/* Chat container - scrollable */}
+      {/* Chat container with items pinned at bottom + scrollable */}
       <div
         className="
           flex-1
           flex
           flex-col
+          justify-end
           px-4
           pt-4
           pb-2
-          overflow-y-scroll
-          custom-scrollbar
+          overflow-y-auto
+          no-scrollbar
         "
       >
         {/* Render messages */}
         {messages.map((msg, index) => {
-          // Accept cookies
+          // Accept cookies prompt
           if (msg.acceptCookiesPrompt) {
             return (
               <div
@@ -179,7 +176,10 @@ const ContactPage = ({ onForceShowBanner }) => {
           // "Thinking..." placeholder
           if (msg.thinking) {
             return (
-              <div key={index} className="mb-4 animate-pop text-left">
+              <div
+                key={index}
+                className="mb-4 animate-pop text-left"
+              >
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
                   className="p-3 rounded-3xl inline-block px-6 max-w-[80%]"
@@ -198,7 +198,7 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal messages
+          // Normal user / AI messages
           return (
             <div
               key={index}
@@ -220,7 +220,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           );
         })}
 
-        {/* Suggestions */}
+        {/* Suggestions with 0.5s delayed pop */}
         {showSuggestions && (
           <div
             className="flex flex-col items-end mb-4 animate-pop"
@@ -258,7 +258,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input field (no background behind it) */}
+      {/* Input field */}
       <div className="p-4">
         <div className="flex mx-auto md:max-w-[45%]">
           <textarea
@@ -281,7 +281,6 @@ const ContactPage = ({ onForceShowBanner }) => {
               font-montserrat
               overflow-y-auto
               overflow-x-hidden
-              custom-scrollbar
               overscroll-contain
               touch-pan-y
             "

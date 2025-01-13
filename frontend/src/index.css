@@ -73,16 +73,15 @@ button:focus-visible {
   }
 }
 /* Hide the scrollbar on desktop for the .custom-scrollbar class */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+/* Hide scrollbar in Chrome/Edge/Safari */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #222;
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #999;
-  border-radius: 3px;
-}
+
 
 
 .animate-gradient {
