@@ -153,7 +153,7 @@ const ContactPage = ({ onForceShowBanner }) => {
               <button
                 key={index}
                 onClick={() => handleSend(choice)}
-                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 hover:from-pink-600 hover:to-orange-600 border border-gradient-to-r from-pink-500 to-orange-500 bg-transparent"
+                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 hover:from-pink-600 hover:to-orange-600 border border-gradient-to-r from-orange-500 to-pink-500 bg-transparent"
               >
                 {choice}
               </button>
