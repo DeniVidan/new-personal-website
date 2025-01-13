@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const services = ["Website", "Web Design", "Logo Design", "Branding", "SEO"]; // Service options
 
 const ContactPage = ({ onForceShowBanner }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [thinkingMessageId, setThinkingMessageId] = useState(null);
+  const [showServiceOptions, setShowServiceOptions] = useState(false); // Control visibility of service options
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -19,12 +21,10 @@ const ContactPage = ({ onForceShowBanner }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSend = async (userMessage) => {
+    if (!userMessage.trim()) return;
 
-    const userMessage = input.trim();
     setInput("");
-
     setMessages((prev) => [...prev, { sender: "You", text: userMessage, animation: true }]);
 
     // Add "Thinking..." message
@@ -36,7 +36,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         sender: "DENI AI",
         text: "",
         id: tempId,
-        thinking: true, // Flag to render the gradient
+        thinking: true,
       },
     ]);
 
@@ -67,14 +67,21 @@ const ContactPage = ({ onForceShowBanner }) => {
 
       if (response.data.aiMessage) {
         setMessages((prev) => {
-          const filteredMessages = prev.filter((msg) => msg.id !== tempId); // Remove "Thinking..." message
-          return [...filteredMessages, { sender: "DENI AI", text: response.data.aiMessage, animation: true }];
+          const filteredMessages = prev.filter((msg) => msg.id !== tempId);
+          const newMessage = response.data.aiMessage;
+
+          // Check if the AI asks about services
+          if (newMessage.toLowerCase().includes("what services are you interested in")) {
+            setShowServiceOptions(true);
+          }
+
+          return [...filteredMessages, { sender: "DENI AI", text: newMessage, animation: true }];
         });
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
       setMessages((prev) => {
-        const filteredMessages = prev.filter((msg) => msg.id !== tempId); // Remove "Thinking..." message
+        const filteredMessages = prev.filter((msg) => msg.id !== tempId);
         return [...filteredMessages, { sender: "DENI AI", text: "An error occurred. Please try again." }];
       });
     } finally {
@@ -82,17 +89,16 @@ const ContactPage = ({ onForceShowBanner }) => {
     }
   };
 
+  const handleServiceClick = (service) => {
+    setShowServiceOptions(false); // Hide service options once a user clicks one
+    handleSend(service); // Treat the selected service as a user message
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSend(input);
     }
-  };
-
-  const handleChatAcceptCookies = () => {
-    localStorage.setItem("cookiesAccepted", "true");
-    if (onForceShowBanner) onForceShowBanner();
-    window.location.reload();
   };
 
   return (
@@ -116,7 +122,6 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // "Thinking..." message with gradient
           if (msg.thinking) {
             return (
               <div key={index} className="mb-4">
@@ -153,6 +158,22 @@ const ContactPage = ({ onForceShowBanner }) => {
             </div>
           );
         })}
+
+        {/* Service options */}
+        {showServiceOptions && (
+          <div className="flex flex-col gap-4">
+            {services.map((service, index) => (
+              <button
+                key={index}
+                onClick={() => handleServiceClick(service)}
+                className="border-2 border-gradient-to-r from-pink-500 to-orange-500 text-white rounded-full px-6 py-2 text-center hover:bg-gradient-to-r hover:from-pink-500 hover:to-orange-500 transition-colors"
+              >
+                {service}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -194,7 +215,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         />
         <div
           className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
-          onClick={handleSend}
+          onClick={() => handleSend(input)}
           style={{
             height: "48px",
             width: "48px",
