@@ -17,11 +17,7 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   useEffect(() => {
     setMessages([
-      {
-        sender: "DENI AI",
-        text: "Hi there! What is your name?",
-        animation: true,
-      },
+      { sender: "DENI AI", text: "Hi there! What is your name?", animation: true },
     ]);
   }, []);
 
@@ -30,15 +26,13 @@ const ContactPage = ({ onForceShowBanner }) => {
   }, [messages]);
 
   const handleSend = async (message) => {
-    const userMessage = message || input.trim(); // Use suggested message or input field
+    const userMessage = message || input.trim();
     if (!userMessage) return;
-    setInput(""); // Clear input field
+    setInput("");
 
-    // Add user's message
     setMessages((prev) => [...prev, { sender: "You", text: userMessage }]);
-    setShowSuggestions(false); // Hide suggestions on send
+    setShowSuggestions(false);
 
-    // Add "Thinking..." message
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
     setMessages((prev) => [
@@ -54,26 +48,24 @@ const ContactPage = ({ onForceShowBanner }) => {
         { withCredentials: true, headers: { "Content-Type": "application/json" } }
       );
 
-      // Remove "Thinking..."
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
-        // Show service suggestions
+        setMessages((prev) => [
+          ...prev,
+          { sender: "DENI AI", text: "Thanks [name], what service are you interested in?" },
+        ]);
         setShowSuggestions(true);
-      } else {
-        // Add AI's response
-        const finalMsg = response.data.aiMessage;
-        if (finalMsg) {
-          setMessages((prev) => [
-            ...prev,
-            { sender: "DENI AI", text: finalMsg, animation: true },
-          ]);
-        }
+      } else if (response.data.aiMessage) {
+        setMessages((prev) => [
+          ...prev,
+          { sender: "DENI AI", text: response.data.aiMessage, animation: true },
+        ]);
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
       setMessages((prev) =>
-        prev.filter((msg) => msg.id !== tempId) // Remove "Thinking..."
+        prev.filter((msg) => msg.id !== tempId)
       );
       setMessages((prev) => [
         ...prev,
@@ -87,16 +79,16 @@ const ContactPage = ({ onForceShowBanner }) => {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend(); // Send input
+      handleSend();
     }
   };
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
-    setShowSuggestions(false); // Hide suggestions if user starts typing
+    setShowSuggestions(false);
     const textarea = inputRef.current;
-    textarea.style.height = "auto"; // Reset height
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`; // Adjust height dynamically
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   };
 
   return (
@@ -114,7 +106,6 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // "Thinking..." gradient
           if (msg.thinking) {
             return (
               <div key={index} className="mb-4">
@@ -136,7 +127,6 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal messages
           return (
             <div
               key={index}
@@ -162,8 +152,8 @@ const ContactPage = ({ onForceShowBanner }) => {
             {SERVICE_CHOICES.map((choice, index) => (
               <button
                 key={index}
-                onClick={() => handleSend(choice)} // Send the selected option
-                className="ml-2 text-white font-medium py-2 px-4 rounded-full shadow mt-2 hover:from-pink-600 hover:to-orange-600 border border-gradient-to-r from-pink-500 to-orange-500 bg-transparent"
+                onClick={() => handleSend(choice)}
+                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 hover:from-pink-600 hover:to-orange-600 border border-gradient-to-r from-pink-500 to-orange-500 bg-transparent"
               >
                 {choice}
               </button>
