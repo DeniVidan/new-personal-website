@@ -140,7 +140,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       {/* Chat container with scrollable messages */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 flex flex-col px-4 pt-4 pb-2 overflow-y-auto no-scrollbar"
+        className="flex-1 flex flex-col px-4 pt-4 pb-2 overflow-y-auto no-scrollbar justify-end"
       >
         {/* Render messages */}
         {messages.map((msg, index) => {
