@@ -15,6 +15,19 @@ const ContactPage = ({ onForceShowBanner }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+
+  useEffect(() => {
+    const warmUpBackend = async () => {
+      try {
+        await axios.get(`${API_BASE_URL}/api/warmup`, { timeout: 3000 });
+        console.log("Backend warmed up successfully.");
+      } catch (error) {
+        console.warn("Backend warm-up failed:", error.message);
+      }
+    };
+    warmUpBackend();
+  }, []);
+
   useEffect(() => {
     setMessages([
       { sender: "DENI AI", text: "Hi there! What is your name?", animation: true },
