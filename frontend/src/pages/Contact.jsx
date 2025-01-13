@@ -12,10 +12,11 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [loading, setLoading] = useState(false);
   const [thinkingMessageId, setThinkingMessageId] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-
+  // Warm-up request
   useEffect(() => {
     const warmUpBackend = async () => {
       try {
@@ -28,14 +29,15 @@ const ContactPage = ({ onForceShowBanner }) => {
     warmUpBackend();
   }, []);
 
+  // Initial AI greeting
   useEffect(() => {
     setMessages([
       { sender: "DENI AI", text: "Hi there! What is your name?", animation: true },
     ]);
   }, []);
 
+  // Scroll to latest message on every messages update
   useEffect(() => {
-    // Ensure the last message is always visible
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
@@ -44,7 +46,7 @@ const ContactPage = ({ onForceShowBanner }) => {
     if (!userMessage) return;
     setInput("");
 
-    // Add user's message to chat
+    // Add user's message
     setMessages((prev) => [
       ...prev,
       { sender: "You", text: userMessage, animation: true },
@@ -58,6 +60,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       ...prev,
       { sender: "DENI AI", text: "", id: tempId, thinking: true },
     ]);
+
     setLoading(true);
 
     try {
@@ -67,7 +70,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         { withCredentials: true, headers: { "Content-Type": "application/json" } }
       );
 
-      // Remove "Thinking..." placeholder
+      // Remove "Thinking..."
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
@@ -84,6 +87,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
+      // Remove "Thinking..."
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
       setMessages((prev) => [
         ...prev,
@@ -102,8 +106,17 @@ const ContactPage = ({ onForceShowBanner }) => {
   };
 
   const handleInputChange = (e) => {
-    setInput(e.target.value);
-    setShowSuggestions(false);
+    const value = e.target.value;
+    setInput(value);
+
+    // If user clears the input, re-show suggestions
+    if (value.trim() === "") {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+
+    // Dynamic textarea height
     const textarea = inputRef.current;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -111,8 +124,10 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
-      <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24 overflow-y-auto">
+      {/* Chat container */}
+      <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24 overflow-y-scroll">
         {messages.map((msg, index) => {
+          // Accept cookies prompt
           if (msg.acceptCookiesPrompt) {
             return (
               <div
@@ -120,22 +135,20 @@ const ContactPage = ({ onForceShowBanner }) => {
                 className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
               >
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
-                <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left">
+                <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%]">
                   <p>{msg.text}</p>
                 </div>
               </div>
             );
           }
 
+          // "Thinking..." placeholder
           if (msg.thinking) {
             return (
-              <div
-                key={index}
-                className="mb-4 animate-pop"
-              >
+              <div key={index} className="mb-4 animate-pop">
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
-                  className="p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left"
+                  className="p-3 rounded-3xl inline-block px-6 max-w-[80%]"
                   style={{
                     backgroundImage: "linear-gradient(90deg, #000, #FFF, #000)",
                     backgroundSize: "200% 200%",
@@ -151,10 +164,13 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
+          // Normal messages (user or AI)
           return (
             <div
               key={index}
-              className={`mb-4 animate-pop ${msg.sender === "You" ? "text-right" : ""} `}
+              className={`mb-4 animate-pop ${
+                msg.sender === "You" ? "text-right" : "text-left"
+              }`}
             >
               <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
               <div
@@ -162,7 +178,7 @@ const ContactPage = ({ onForceShowBanner }) => {
                   msg.sender === "You"
                     ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
                     : "bg-white text-black"
-                } p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left`}
+                } p-3 rounded-3xl inline-block px-6 max-w-[80%]`}
               >
                 {msg.text}
               </div>
@@ -172,18 +188,22 @@ const ContactPage = ({ onForceShowBanner }) => {
 
         {/* Service suggestions */}
         {showSuggestions && (
-          <div className="flex flex-col items-end mb-4 animate-pop">
+          <div
+            className="flex flex-col items-end mb-4 animate-pop"
+            style={{ animationDelay: "0.5s" }} // Delayed so it appears after AI text
+          >
             {SERVICE_CHOICES.map((choice, index) => (
               <button
                 key={index}
                 onClick={() => handleSend(choice)}
-                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-1 border-orange-500 bg-transparent hover:bg-orange-500 transition-colors duration-200"
+                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-2 border-orange-500 bg-transparent hover:bg-orange-500 hover:text-black transition-colors duration-200"
               >
                 {choice}
               </button>
             ))}
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -196,7 +216,23 @@ const ContactPage = ({ onForceShowBanner }) => {
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           placeholder="Type something..."
-          className="resize-none flex-1 py-3 rounded-3xl bg-white text-gray-700 focus:outline-none pl-5 w-[65%] font-montserrat overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain touch-pan-y"
+          className="
+            resize-none
+            flex-1
+            py-3
+            rounded-3xl
+            bg-white
+            text-gray-700
+            focus:outline-none
+            pl-5
+            w-[65%]
+            font-montserrat
+            overflow-y-auto
+            overflow-x-hidden
+            custom-scrollbar
+            overscroll-contain
+            touch-pan-y
+          "
           style={{
             lineHeight: "1.5",
             maxHeight: "120px",
