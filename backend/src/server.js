@@ -54,6 +54,9 @@ app.use('/api', mainRouter);
 app.get('/health', (req, res) => {
   res.status(200).send('Server is healthy.');
 });
+router.get('/warmup', (req, res) => {
+    res.status(200).send('Backend is ready!');
+  });
 
 // Start the server
 const PORT = process.env.PORT;
