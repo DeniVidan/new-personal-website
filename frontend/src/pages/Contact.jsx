@@ -260,7 +260,7 @@ const ContactPage = ({ onForceShowBanner }) => {
 
       {/* Input field */}
       <div className="p-4">
-        <div className="flex mx-auto md:max-w-[45%]">
+        <div className="flex mx-auto lg:max-w-[45%]">
           <textarea
             ref={inputRef}
             rows={1}

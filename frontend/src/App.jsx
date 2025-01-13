@@ -31,16 +31,16 @@ function App() {
       {/* If "showBanner" is true, we force show the cookie banner */}
       <CookieBanner forceShow={showBanner} />
 
-      <div className="mt-36 absolute top-0 left-0 w-full h-screen z-10">
+      <div className="absolute top-0 left-0 w-full h-screen z-10">
         <Routes>
-          <Route path="/" element={<Homepage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route className="mt-36" path="/" element={<Homepage />} />
+          <Route className="mt-36" path="/about" element={<AboutPage />} />
           <Route
             path="/contact"
             element={<ContactPage onForceShowBanner={forceShowBanner} />}
           />
-          <Route path="/projects" element={<MyWorkPage />} />
-          <Route path="/cookie-policy" element={<CookiePolicy />} />
+          <Route className="mt-36" path="/projects" element={<MyWorkPage />} />
+          <Route className="mt-36" path="/cookie-policy" element={<CookiePolicy />} />
         </Routes>
       </div>
     </Router>
