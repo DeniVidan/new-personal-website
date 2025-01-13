@@ -3,14 +3,15 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Define the list of services you want to appear as separate messages
-const SERVICE_CHOICES = ["Website Design", "Logo Design", "Branding", "SEO", "Other"];
+// Define the list of services you want to appear as clickable options
+const SERVICE_CHOICES = ["Website", "Website Design", "Logo Design", "Branding"/* , "SEO" */];
 
 const ContactPage = ({ onForceShowBanner }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [thinkingMessageId, setThinkingMessageId] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -28,15 +29,16 @@ const ContactPage = ({ onForceShowBanner }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMessage = input.trim();
-    setInput("");
+  const handleSend = async (message) => {
+    const userMessage = message || input.trim(); // Use suggested message or input field
+    if (!userMessage) return;
+    setInput(""); // Clear input field
 
-    // 1) Add user's message
+    // Add user's message
     setMessages((prev) => [...prev, { sender: "You", text: userMessage }]);
+    setShowSuggestions(false); // Hide suggestions on send
 
-    // 2) Add "Thinking..." message
+    // Add "Thinking..." message
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
     setMessages((prev) => [
@@ -56,21 +58,10 @@ const ContactPage = ({ onForceShowBanner }) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
-        // *** Return multiple "fake user messages" on the right side ***
-        // each with style: border radius 9999px, border color pink->orange, background none, text white
-        // We'll skip adding the normal AI message
-        SERVICE_CHOICES.forEach((service) => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              sender: "You", // appear on the right
-              text: service,
-              styleServiceChoice: true, // custom styling
-            },
-          ]);
-        });
+        // Show service suggestions
+        setShowSuggestions(true);
       } else {
-        // Normal AI message
+        // Add AI's response
         const finalMsg = response.data.aiMessage;
         if (finalMsg) {
           setMessages((prev) => [
@@ -81,11 +72,9 @@ const ContactPage = ({ onForceShowBanner }) => {
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-      // Remove "Thinking..."
       setMessages((prev) =>
-        prev.filter((msg) => msg.id !== tempId)
+        prev.filter((msg) => msg.id !== tempId) // Remove "Thinking..."
       );
-      // Show error message
       setMessages((prev) => [
         ...prev,
         { sender: "DENI AI", text: "An error occurred. Please try again." },
@@ -98,36 +87,28 @@ const ContactPage = ({ onForceShowBanner }) => {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      handleSend(); // Send input
     }
   };
 
-  const handleChatAcceptCookies = () => {
-    localStorage.setItem("cookiesAccepted", "true");
-    if (onForceShowBanner) onForceShowBanner();
-    window.location.reload();
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+    setShowSuggestions(false); // Hide suggestions if user starts typing
+    const textarea = inputRef.current;
+    textarea.style.height = "auto"; // Reset height
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`; // Adjust height dynamically
   };
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
       <div className="flex-1 flex flex-col justify-end mb-20 p-4 pb-24 overflow-y-auto">
         {messages.map((msg, index) => {
-          // COOKIES PROMPT
           if (msg.acceptCookiesPrompt) {
             return (
-              <div
-                key={index}
-                className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}
-              >
+              <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}>
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left">
                   <p>{msg.text}</p>
-                  <button
-                    className="ml-2 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded shadow mt-2"
-                    onClick={handleChatAcceptCookies}
-                  >
-                    Accept Cookies
-                  </button>
                 </div>
               </div>
             );
@@ -143,32 +124,13 @@ const ContactPage = ({ onForceShowBanner }) => {
                   style={{
                     backgroundImage: "linear-gradient(90deg, #000, #FFF, #000)",
                     backgroundSize: "200% 200%",
-                    animation: "gradient-move 3s linear infinite forwards",
+                    animation: "gradient-move 3s linear infinite",
                     color: "transparent",
                     backgroundClip: "text",
                     WebkitBackgroundClip: "text",
                   }}
                 >
                   Thinking...
-                </div>
-              </div>
-            );
-          }
-
-          // SERVICE CHOICE special styling
-          if (msg.styleServiceChoice) {
-            // user side with circle gradient border, background none, text white
-            return (
-              <div key={index} className="mb-4 text-right">
-                <div className="text-sm text-gray-400 mb-1">You</div>
-                <div
-                  className="inline-block px-6 py-2 max-w-[80%] text-white rounded-full border-2"
-                  style={{
-                    borderImage: "linear-gradient(to right, pink, orange) 1",
-                    background: "none",
-                  }}
-                >
-                  {msg.text}
                 </div>
               </div>
             );
@@ -193,6 +155,21 @@ const ContactPage = ({ onForceShowBanner }) => {
             </div>
           );
         })}
+
+        {/* Service suggestions */}
+        {showSuggestions && (
+          <div className="flex flex-col items-end mb-4">
+            {SERVICE_CHOICES.map((choice, index) => (
+              <button
+                key={index}
+                onClick={() => handleSend(choice)} // Send the selected option
+                className="ml-2 bg-gradient-to-r from-pink-500 to-orange-500 text-white font-medium py-2 px-4 rounded-full shadow mt-2 hover:from-pink-600 hover:to-orange-600"
+              >
+                {choice}
+              </button>
+            ))}
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -202,12 +179,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           ref={inputRef}
           rows={1}
           value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            const textarea = inputRef.current;
-            textarea.style.height = "auto";
-            textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
-          }}
+          onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           placeholder="Type something..."
           className="
@@ -234,7 +206,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         />
         <div
           className="ml-2 flex cursor-pointer items-center justify-center text-white rounded-full bg-gradient-to-r from-red-500 to-orange-500"
-          onClick={handleSend}
+          onClick={() => handleSend()}
           style={{ height: "48px", width: "48px" }}
         >
           <img
