@@ -447,7 +447,7 @@ Examples:
 - If scenario="serviceProvidedInsteadOfName", you might say:
   "I understand you would like {userData.interest}, but I didn’t catch your name. Could you please share it with me so we can proceed?"
 - If scenario="gotNameNeedEmail", you might say:
-  "Nice to meet you, {userData.name}! Could I please have your email address so we can proceed?"
+  "Nice to meet you, {userData.name}! Could I please have your email so we can send you customized offer?"
 - If scenario="askService", you might say:
   "Thanks, {userData.name}! What service are you interested in?"
 - If scenario="allDataCollected", you might say:
