@@ -123,11 +123,24 @@ const ContactPage = ({ onForceShowBanner }) => {
             </div>
           );
         })}
-        {loading && (
-          <div className="text-center">
-            <img src="/loading-circle.gif" alt="Loading..." className="w-8 h-8 mx-auto" />
-          </div>
-        )}
+{loading && (
+  <div className="flex items-center justify-center mt-4">
+    <div
+      className="flex items-center p-3 rounded-full text-sm text-white bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent animate-gradient"
+      style={{
+        backgroundSize: '200% 200%',
+      }}
+    >
+      <span className="mr-2">DENI AI is thinking</span>
+      <div className="flex ml-2">
+        <span className="dot animate-bounce">.</span>
+        <span className="dot animate-bounce delay-150">.</span>
+        <span className="dot animate-bounce delay-300">.</span>
+      </div>
+    </div>
+  </div>
+)}
+
         <div ref={messagesEndRef} />
       </div>
 
