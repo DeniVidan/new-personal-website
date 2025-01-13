@@ -30,7 +30,15 @@ const ContactPage = ({ onForceShowBanner }) => {
     // Add "Thinking..." message
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
-    setMessages((prev) => [...prev, { sender: "DENI AI", text: "Thinking...", id: tempId }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "DENI AI",
+        text: "",
+        id: tempId,
+        thinking: true, // Flag to render the gradient
+      },
+    ]);
 
     setLoading(true);
 
@@ -108,6 +116,28 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
+          // "Thinking..." message with gradient
+          if (msg.thinking) {
+            return (
+              <div key={index} className="mb-4">
+                <div className="text-sm text-gray-400 mb-1">DENI AI</div>
+                <div
+                  className="p-3 rounded-3xl inline-block px-6 max-w-[80%] text-left"
+                  style={{
+                    backgroundImage: "linear-gradient(90deg, #000, #FFF, #000)",
+                    backgroundSize: "200% 200%",
+                    animation: "gradient-move 3s linear infinite",
+                    color: "transparent",
+                    backgroundClip: "text",
+                    WebkitBackgroundClip: "text",
+                  }}
+                >
+                  Thinking...
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : ""}`}>
               <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
@@ -123,22 +153,6 @@ const ContactPage = ({ onForceShowBanner }) => {
             </div>
           );
         })}
-{loading && (
-  <div className="text-center">
-    <p
-      className="text-2xl font-semibold bg-clip-text text-transparent animate-gradient"
-      style={{
-        backgroundImage: "linear-gradient(90deg, #FF6F61, #FFC107, #8BC34A)",
-        backgroundSize: "200% 200%",
-        animation: "gradient-move 3s linear infinite",
-      }}
-    >
-      Thinking...
-    </p>
-  </div>
-)}
-
-
         <div ref={messagesEndRef} />
       </div>
 
