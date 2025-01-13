@@ -14,7 +14,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [step, setStep] = useState(1); // Track conversation step
 
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
 
   // 1) Warm up backend (non-blocking)
@@ -37,9 +37,12 @@ const ContactPage = ({ onForceShowBanner }) => {
     ]);
   }, []);
 
-  // 3) Scroll to bottom whenever messages change
+  // 3) Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesContainerRef.current?.scrollTo({
+      top: messagesContainerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   /**
@@ -79,19 +82,14 @@ const ContactPage = ({ onForceShowBanner }) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       if (response.data.showServiceSuggestions) {
-        // Update step for suggestions
-        setStep(3); // Update step to "interest selection"
-        // Insert chatbot message
+        setStep(3); // Step for interest selection
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
         ]);
-        // Delay suggestions
         setTimeout(() => setShowSuggestions(true), 500);
       } else if (response.data.aiMessage) {
-        // Update step if response moves conversation forward
         setStep((prevStep) => prevStep + 1);
-        // Normal chatbot message
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
@@ -99,10 +97,7 @@ const ContactPage = ({ onForceShowBanner }) => {
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-      // Remove placeholder
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-
-      // Show error
       setMessages((prev) => [
         ...prev,
         {
@@ -113,8 +108,6 @@ const ContactPage = ({ onForceShowBanner }) => {
       ]);
     } finally {
       setLoading(false);
-      // Scroll to bottom
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -132,12 +125,11 @@ const ContactPage = ({ onForceShowBanner }) => {
     setInput(value);
 
     if (value.trim() === "" && step === 3) {
-      setShowSuggestions(true); // Show suggestions only during step 3
+      setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
 
-    // Resize textarea
     const textarea = inputRef.current;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -147,39 +139,11 @@ const ContactPage = ({ onForceShowBanner }) => {
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
       {/* Chat container with scrollable messages */}
       <div
-        className="
-          flex-1
-          flex
-          flex-col
-          justify-end
-          px-4
-          pt-4
-          pb-2
-          overflow-y-scroll
-          no-scrollbar
-        "
-        style={{ overflowY: "auto", scrollBehavior: "smooth" }}
+        ref={messagesContainerRef}
+        className="flex-1 flex flex-col px-4 pt-4 pb-2 overflow-y-auto no-scrollbar"
       >
         {/* Render messages */}
         {messages.map((msg, index) => {
-          // Accept cookies prompt
-          if (msg.acceptCookiesPrompt) {
-            return (
-              <div
-                key={index}
-                className={`mb-4 ${
-                  msg.sender === "You" ? "text-right" : "text-left"
-                } animate-pop`}
-              >
-                <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
-                <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%]">
-                  <p>{msg.text}</p>
-                </div>
-              </div>
-            );
-          }
-
-          // "Thinking..." placeholder
           if (msg.thinking) {
             return (
               <div key={index} className="mb-4 animate-pop text-left">
@@ -201,7 +165,6 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal messages
           return (
             <div
               key={index}
@@ -223,7 +186,6 @@ const ContactPage = ({ onForceShowBanner }) => {
           );
         })}
 
-        {/* Suggestions */}
         {showSuggestions && (
           <div className="flex flex-col items-end mb-4 animate-pop">
             {SERVICE_CHOICES.map((choice, index) => (
@@ -238,7 +200,7 @@ const ContactPage = ({ onForceShowBanner }) => {
                   rounded-full
                   shadow
                   mt-2
-                  border-2
+                  border-1
                   border-orange-500
                   bg-transparent
                   hover:bg-orange-500
@@ -253,12 +215,10 @@ const ContactPage = ({ onForceShowBanner }) => {
             ))}
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input field */}
-      <div className="p-4">
+      <div className="p-4 sticky bottom-0 bg-black">
         <div className="flex mx-auto lg:max-w-[45%]">
           <textarea
             ref={inputRef}
