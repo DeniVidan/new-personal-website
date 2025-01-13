@@ -141,7 +141,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           return (
             <div
               key={index}
-              className={`mb-4 ${msg.sender === "You" ? "text-right" : ""} animate-pop`}
+              className={`mb-4 animate-pop ${msg.sender === "You" ? "text-right" : ""} `}
             >
               <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
               <div
@@ -159,12 +159,12 @@ const ContactPage = ({ onForceShowBanner }) => {
 
         {/* Service suggestions */}
         {showSuggestions && (
-          <div className="flex flex-col items-end mb-4">
+          <div className="flex flex-col items-end mb-4 animate-pop">
             {SERVICE_CHOICES.map((choice, index) => (
               <button
                 key={index}
                 onClick={() => handleSend(choice)}
-                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-2 border-orange-500 bg-transparent hover:bg-orange-500 hover:text-white transition-colors duration-200"
+                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-1 border-orange-500 bg-transparent hover:bg-orange-500 transition-colors duration-200"
               >
                 {choice}
               </button>
