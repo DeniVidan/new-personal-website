@@ -124,22 +124,20 @@ const ContactPage = ({ onForceShowBanner }) => {
           );
         })}
 {loading && (
-  <div className="flex items-center justify-center mt-4">
-    <div
-      className="flex items-center p-3 rounded-full text-sm text-white bg-gradient-to-r from-pink-500 via-orange-500 to-yellow-500 bg-clip-text text-transparent animate-gradient"
+  <div className="text-center">
+    <p
+      className="text-2xl font-semibold bg-clip-text text-transparent animate-gradient"
       style={{
-        backgroundSize: '200% 200%',
+        backgroundImage: "linear-gradient(90deg, #FF6F61, #FFC107, #8BC34A)",
+        backgroundSize: "200% 200%",
+        animation: "gradient-move 3s linear infinite",
       }}
     >
-      <span className="mr-2">DENI AI is thinking</span>
-      <div className="flex ml-2">
-        <span className="dot animate-bounce">.</span>
-        <span className="dot animate-bounce delay-150">.</span>
-        <span className="dot animate-bounce delay-300">.</span>
-      </div>
-    </div>
+      Thinking...
+    </p>
   </div>
 )}
+
 
         <div ref={messagesEndRef} />
       </div>
