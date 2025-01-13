@@ -16,87 +16,81 @@ const ContactPage = ({ onForceShowBanner }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // 1) Warm up the backend
+  // Remove or handle warm-up gracefully
   useEffect(() => {
     const warmUpBackend = async () => {
       try {
+        // Optional warmup. If it fails, just log a warning—don't break the chat.
         await axios.get(`${API_BASE_URL}/api/warmup`, { timeout: 3000 });
         console.log("Backend warmed up successfully.");
       } catch (error) {
-        console.warn("Backend warm-up failed:", error.message);
+        console.warn("Backend warm-up failed (non-blocking):", error.message);
       }
     };
     warmUpBackend();
   }, []);
 
-  // 2) Initial greeting
+  // Initial greeting
   useEffect(() => {
     setMessages([
       { sender: "DENI AI", text: "Hi there! What is your name?", animation: true },
     ]);
   }, []);
 
-  // 3) Scroll down whenever messages change
+  // Scroll to the latest message whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Helper: scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   /**
    * handleSend:
-   * - Replaces "Thinking..." with final chatbot message
-   * - Retains "pop" animation for that message
+   *  - Sends user message to backend
+   *  - Replaces "Thinking..." with final AI message
    */
   const handleSend = async (message) => {
     const userMessage = message || input.trim();
     if (!userMessage) return;
     setInput("");
 
-    // 1) User message
+    // Add user's message
     setMessages((prev) => [
       ...prev,
       { sender: "You", text: userMessage, animation: true },
     ]);
     setShowSuggestions(false);
 
-    // 2) "Thinking..." placeholder
+    // Add "Thinking..." placeholder
     const tempId = `thinking-${Date.now()}`;
     setThinkingMessageId(tempId);
     setMessages((prev) => [
       ...prev,
       { sender: "DENI AI", text: "", id: tempId, thinking: true },
     ]);
-
     setLoading(true);
 
     try {
-      // 3) Send to backend
+      // POST to /api/chat
       const response = await axios.post(
         `${API_BASE_URL}/api/chat`,
         { userInput: userMessage },
         { withCredentials: true, headers: { "Content-Type": "application/json" } }
       );
 
-      // 4) Remove "Thinking..."
+      // Remove placeholder
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
-      // 5) If "showServiceSuggestions"
       if (response.data.showServiceSuggestions) {
+        // Show AI message
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
         ]);
-        // Delay suggestions by 0.5s, then show
+        // Delay suggestions by 0.5s
         setTimeout(() => {
           setShowSuggestions(true);
         }, 500);
-      }
-      // Otherwise normal AI message
-      else if (response.data.aiMessage) {
+      } else if (response.data.aiMessage) {
+        // Normal AI message
         setMessages((prev) => [
           ...prev,
           { sender: "DENI AI", text: response.data.aiMessage, animation: true },
@@ -104,26 +98,22 @@ const ContactPage = ({ onForceShowBanner }) => {
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-
       // Remove placeholder
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
 
       // Show error
       setMessages((prev) => [
         ...prev,
-        {
-          sender: "DENI AI",
-          text: "An error occurred. Please try again.",
-          animation: true,
-        },
+        { sender: "DENI AI", text: "An error occurred. Please try again.", animation: true },
       ]);
     } finally {
       setLoading(false);
-      scrollToBottom();
+      // Scroll to bottom on each send
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // Sending on Enter
+  // Send on Enter
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -131,18 +121,19 @@ const ContactPage = ({ onForceShowBanner }) => {
     }
   };
 
-  // Hides/shows suggestions if user typed/cleared input
+  // Re-show suggestions if user clears text
   const handleInputChange = (e) => {
     const value = e.target.value;
     setInput(value);
 
+    // If user fully clears input, re-show suggestions
     if (value.trim() === "") {
-      // If user fully clears input, restore suggestions if they were active
       setShowSuggestions(true);
     } else {
       setShowSuggestions(false);
     }
 
+    // Dynamic textarea height
     const textarea = inputRef.current;
     textarea.style.height = "auto";
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -150,18 +141,28 @@ const ContactPage = ({ onForceShowBanner }) => {
 
   return (
     <div className="flex flex-col h-screen text-white mx-auto md:max-w-[65%] font-montserrat">
-      {/*  Chat Container  */}
-      <div className="flex-1 flex flex-col p-4 pt-4 overflow-y-scroll">
+      {/* Chat container - scrollable */}
+      <div
+        className="
+          flex-1
+          flex
+          flex-col
+          p-4
+          pt-4
+          overflow-y-scroll
+          custom-scrollbar
+        "
+        style={{
+          // Example of minimal scrollbar styling (for desktop)
+          scrollbarWidth: "thin",        // Firefox
+          scrollbarColor: "#999 #444",   // Firefox
+        }}
+      >
         {messages.map((msg, index) => {
-          // Accept cookies logic
+          // Accept cookies
           if (msg.acceptCookiesPrompt) {
             return (
-              <div
-                key={index}
-                className={`mb-4 ${
-                  msg.sender === "You" ? "text-right" : "text-left"
-                } animate-pop`}
-              >
+              <div key={index} className={`mb-4 ${msg.sender === "You" ? "text-right" : "text-left"} animate-pop`}>
                 <div className="text-sm text-gray-400 mb-1">{msg.sender}</div>
                 <div className="bg-white text-black p-3 rounded-3xl inline-block px-6 max-w-[80%]">
                   <p>{msg.text}</p>
@@ -173,10 +174,7 @@ const ContactPage = ({ onForceShowBanner }) => {
           // "Thinking..." placeholder
           if (msg.thinking) {
             return (
-              <div
-                key={index}
-                className="mb-4 animate-pop text-left"
-              >
+              <div key={index} className="mb-4 animate-pop text-left">
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
                   className="p-3 rounded-3xl inline-block px-6 max-w-[80%]"
@@ -195,7 +193,7 @@ const ContactPage = ({ onForceShowBanner }) => {
             );
           }
 
-          // Normal messages (user or chatbot)
+          // Normal messages
           return (
             <div
               key={index}
@@ -217,11 +215,11 @@ const ContactPage = ({ onForceShowBanner }) => {
           );
         })}
 
-        {/* Service suggestions */}
+        {/* Delayed suggestions */}
         {showSuggestions && (
           <div
             className="flex flex-col items-end mb-4 animate-pop"
-            style={{ animationDelay: "0.5s" }} // Appear 0.5s after AI text
+            style={{ animationDelay: "0.5s" }}
           >
             {SERVICE_CHOICES.map((choice, index) => (
               <button
@@ -244,18 +242,20 @@ const ContactPage = ({ onForceShowBanner }) => {
                   duration-200
                   animate-pop
                 "
-                style={{ animationDelay: "0.5s" }} // each button also has 0.5s delay
+                style={{ animationDelay: "0.5s" }}
               >
                 {choice}
               </button>
             ))}
           </div>
         )}
+
+        {/* So we can always scroll to last message */}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input field */}
-      <div className="p-4 bg-gray-900">
+      {/* Input field (no background behind it) */}
+      <div className="p-4">
         <div className="flex mx-auto md:max-w-[45%]">
           <textarea
             ref={inputRef}

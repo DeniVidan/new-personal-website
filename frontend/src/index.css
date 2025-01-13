@@ -72,6 +72,18 @@ button:focus-visible {
     background-position: 0% 50%;
   }
 }
+/* Hide the scrollbar on desktop for the .custom-scrollbar class */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #222;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #999;
+  border-radius: 3px;
+}
+
 
 .animate-gradient {
   background-clip: text;
