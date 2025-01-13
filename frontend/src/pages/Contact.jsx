@@ -7,6 +7,7 @@ const ContactPage = ({ onForceShowBanner }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [thinkingMessageId, setThinkingMessageId] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -25,6 +26,12 @@ const ContactPage = ({ onForceShowBanner }) => {
     setInput("");
 
     setMessages((prev) => [...prev, { sender: "You", text: userMessage, animation: true }]);
+
+    // Add "Thinking..." message
+    const tempId = `thinking-${Date.now()}`;
+    setThinkingMessageId(tempId);
+    setMessages((prev) => [...prev, { sender: "DENI AI", text: "Thinking...", id: tempId }]);
+
     setLoading(true);
 
     try {
@@ -51,24 +58,23 @@ const ContactPage = ({ onForceShowBanner }) => {
       );
 
       if (response.data.aiMessage) {
-        setMessages((prev) => [
-          ...prev,
-          { sender: "DENI AI", text: response.data.aiMessage, animation: true },
-        ]);
+        setMessages((prev) => {
+          const filteredMessages = prev.filter((msg) => msg.id !== tempId); // Remove "Thinking..." message
+          return [...filteredMessages, { sender: "DENI AI", text: response.data.aiMessage, animation: true }];
+        });
       }
     } catch (error) {
       console.error("Error in handleSend:", error);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "DENI AI", text: "An error occurred. Please try again." },
-      ]);
+      setMessages((prev) => {
+        const filteredMessages = prev.filter((msg) => msg.id !== tempId); // Remove "Thinking..." message
+        return [...filteredMessages, { sender: "DENI AI", text: "An error occurred. Please try again." }];
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    // Enter to send, Shift+Enter for new line
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -133,7 +139,6 @@ const ContactPage = ({ onForceShowBanner }) => {
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
-            // Dynamically adjust the height of the textarea
             const textarea = inputRef.current;
             textarea.style.height = "auto";
             textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
@@ -176,4 +181,5 @@ const ContactPage = ({ onForceShowBanner }) => {
     </div>
   );
 };
+
 export default ContactPage;
