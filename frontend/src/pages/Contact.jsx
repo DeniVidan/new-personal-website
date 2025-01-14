@@ -102,7 +102,7 @@ const ContactPage = ({ onForceShowBanner }) => {
         ...prev,
         {
           sender: "DENI AI",
-          text: "An error occurred. Please try again.",
+          text: "An error occurred. Please try again later.",
           animation: true,
         },
       ]);
@@ -140,7 +140,8 @@ const ContactPage = ({ onForceShowBanner }) => {
       {/* Chat container with scrollable messages */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 flex flex-col px-4 pt-4 pb-2 overflow-y-auto no-scrollbar justify-end"
+        className="flex-1 flex flex-col px-4 pt-4 pb-2 overflow-y-auto"
+        style={{ scrollBehavior: "smooth" }}
       >
         {/* Render messages */}
         {messages.map((msg, index) => {
@@ -192,33 +193,19 @@ const ContactPage = ({ onForceShowBanner }) => {
               <button
                 key={index}
                 onClick={() => handleSend(choice)}
-                className="
-                  text-white
-                  font-medium
-                  py-2
-                  px-4
-                  rounded-full
-                  shadow
-                  mt-2
-                  border-1
-                  border-orange-500
-                  bg-transparent
-                  hover:bg-orange-500
-                  hover:text-black
-                  transition-colors
-                  duration-200
-                  animate-pop
-                "
+                className="text-white font-medium py-2 px-4 rounded-full shadow mt-2 border-1 border-orange-500 bg-transparent hover:bg-orange-500 hover:text-black transition-colors duration-200 animate-pop"
               >
                 {choice}
               </button>
             ))}
           </div>
         )}
+
+        <div ref={messagesContainerRef} />
       </div>
 
       {/* Input field */}
-      <div className="p-4 sticky bottom-0">
+      <div className="p-4 sticky bottom-0 bg-black">
         <div className="flex mx-auto lg:max-w-[45%]">
           <textarea
             ref={inputRef}

@@ -63,13 +63,13 @@ button:focus-visible {
 
 @keyframes gradient-move {
   0% {
-    background-position: 0% 50%;
+    background-position: -50% 50%;
   }
   50% {
-    background-position: 100% 50%;
+    background-position: 150% 50%;
   }
   100% {
-    background-position: 0% 50%;
+    background-position: -50% 50%;
   }
 }
 /* Hide the scrollbar on desktop for the .custom-scrollbar class */
