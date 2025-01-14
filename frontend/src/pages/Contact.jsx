@@ -149,11 +149,10 @@ const ContactPage = ({ onForceShowBanner }) => {
               <div key={index} className="mb-4 animate-pop text-left">
                 <div className="text-sm text-gray-400 mb-1">DENI AI</div>
                 <div
-                  className="p-3 rounded-3xl inline-block px-6 max-w-[80%]"
+                  className="p-3 rounded-3xl inline-block px-6 max-w-[80%] animate-gradient"
                   style={{
                     backgroundImage: "linear-gradient(90deg, #000, #FFF, #000)",
                     backgroundSize: "200% 200%",
-                    animation: "gradient-move 3s linear infinite",
                     color: "transparent",
                     backgroundClip: "text",
                     WebkitBackgroundClip: "text",
