@@ -54,7 +54,7 @@ app.use('/api', mainRouter);
 app.get('/health', (req, res) => {
   res.status(200).send('Server is healthy.');
 });
-app.get('/warmup', (req, res) => {
+app.get('/api/warmup', (req, res) => {
     res.status(200).send('Backend is ready!');
   });
 
