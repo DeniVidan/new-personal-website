@@ -51,6 +51,7 @@ const Hero = () => {
           <div ref={textRef2} className="font-custom">HAPPEN</div>
         </h1>
       </div>
+      <span className="absolute bottom-0 right-0 text-white/70 text-sm z-30 p-2">*not my image</span>
     </section>
   );
 };

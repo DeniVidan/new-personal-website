@@ -135,6 +135,7 @@ const AboutPage = () => {
           <div className="relative w-full md:w-1/2 h-96 md:h-[600px]">
             <div ref={rectangleRef} className="absolute inset-0 bg-gradient-to-br from-red-500 to-orange-500"></div>
             <img ref={imageRef} src="/hero-img.png" alt="Profile" className="absolute -bottom-[1px] w-full h-full object-cover" />
+            <span className="absolute bottom-0 right-0 text-white/70 text-sm z-30 p-2 translate-y-full">*not my image</span>
           </div>
           <div className="w-full md:w-1/2 p-8 mt-44 md:mt-0 space-y-6 text-center font-montserrat">
             <p ref={el => bioTextRefs.current[0] = el} className="text-lg md:text-3xl text-gray-200">
@@ -164,7 +165,7 @@ const AboutPage = () => {
           <Contact />
         </section>
         <section>
-          <TitleBraker message="TODAY’S DECISION MAKES FUTURE SIMPLE" />
+          <TitleBraker message="TODAY'S DECISION MAKES FUTURE SIMPLE" />
         </section>
         <section>
           <Footer />
